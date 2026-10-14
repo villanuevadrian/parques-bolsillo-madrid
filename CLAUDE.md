@@ -11,7 +11,7 @@ innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/e
 # Flujo de trabajo (ingeniería de software ligera)
 1. Plan: antes de tocar código, arquitectura y pasos. Espera mi aprobación.
 2. Implementa en pasos pequeños; tras cada uno, ejecuta `pytest -q` y adapta o añade tests si cambias el dominio.
-3. Cuando haya algo funcionando de punta a punta, lanza un subagente revisor que no haya visto el desarrollo: que revise robustez, errores y accesibilidad como lo haría el jurado, y aplica solo lo importante.
+3. Cuando haya algo funcionando de punta a punta, lanza el subagente `jurado` (`.claude/agents/jurado.md`), que no ha visto el desarrollo: que revise robustez, errores y accesibilidad como lo haría el jurado, y aplica solo lo importante.
 4. Mantén actualizado el diagrama Mermaid del README.
 
 # Reglas de trabajo
