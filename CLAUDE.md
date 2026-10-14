@@ -15,3 +15,14 @@ innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/e
 - Mantén las funciones de accesibilidad (lectura fácil, texto grande, contraste, ES/EN, voz, descripciones de gráficos).
 - Si algo falla 2 veces, propón una versión más simple.
 - Responde en español, directo, sin relleno.
+
+# Entorno y verificación
+- Usa siempre `.venv` (Python 3.12, ya instalado). No reinstales ni recrees el venv.
+- Si se aprueba una dependencia nueva: `.venv/bin/pip install X` y añádela a `requirements.txt` en el mismo commit.
+- Prueba de punta a punta: `./scripts/smoke.sh`. Al cambiar el dominio, actualiza su `PREDICT_BODY` a los campos nuevos de `/predict`.
+- Ver la app: `.claude/launch.json` (API :8000, Streamlit :8501) en el panel del navegador.
+
+# Cierre (antes del último commit) — no olvidar
+- Congela versiones: `.venv/bin/pip freeze > requirements.lock.txt` y commitéalo.
+- Actualiza README (arranque) y la pestaña "Sobre el proyecto" al dominio final.
+- `./scripts/smoke.sh` en verde.
