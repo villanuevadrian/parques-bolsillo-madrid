@@ -8,6 +8,12 @@ innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/e
 - `app/main.py` → FastAPI. `frontend/streamlit_app.py` → UI accesible + pestaña "Sobre el proyecto".
 - Arranque: `python data/generate.py`, `uvicorn app.main:app --reload`, `streamlit run frontend/streamlit_app.py`.
 
+# Flujo de trabajo (ingeniería de software ligera)
+1. Plan: antes de tocar código, arquitectura y pasos. Espera mi aprobación.
+2. Implementa en pasos pequeños; tras cada uno, ejecuta `pytest -q` y adapta o añade tests si cambias el dominio.
+3. Cuando haya algo funcionando de punta a punta, lanza un subagente revisor que no haya visto el desarrollo: que revise robustez, errores y accesibilidad como lo haría el jurado, y aplica solo lo importante.
+4. Mantén actualizado el diagrama Mermaid del README.
+
 # Reglas de trabajo
 - Reutiliza esta arquitectura; cambia el dominio, no la estructura. Nada de frontend complejo ni dependencias nuevas sin preguntar.
 - Pasos pequeños. Tras cada cambio, ejecútalo/pruébalo tú mismo (curl a la API, import del módulo) antes de decir que funciona.
@@ -19,10 +25,11 @@ innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/e
 # Entorno y verificación
 - Usa siempre `.venv` (Python 3.12, ya instalado). No reinstales ni recrees el venv.
 - Si se aprueba una dependencia nueva: `.venv/bin/pip install X` y añádela a `requirements.txt` en el mismo commit.
+- Tests: `pytest -q` significa `.venv/bin/python -m pytest -q` (`tests/test_api.py`, sin red).
 - Prueba de punta a punta: `./scripts/smoke.sh`. Al cambiar el dominio, actualiza su `PREDICT_BODY` a los campos nuevos de `/predict`.
 - Ver la app: `.claude/launch.json` (API :8000, Streamlit :8501) en el panel del navegador.
 
 # Cierre (antes del último commit) — no olvidar
 - Congela versiones: `.venv/bin/pip freeze > requirements.lock.txt` y commitéalo.
 - Actualiza README (arranque) y la pestaña "Sobre el proyecto" al dominio final.
-- `./scripts/smoke.sh` en verde.
+- `pytest -q` y `./scripts/smoke.sh` en verde.
