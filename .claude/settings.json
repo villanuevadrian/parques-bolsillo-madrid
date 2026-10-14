@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/smoke.sh:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(.venv/bin/pip install:*)",
+      "Bash(.venv/bin/uvicorn:*)",
+      "Bash(.venv/bin/streamlit:*)",
+      "Bash(curl -s localhost:*)",
+      "Bash(curl -s http://localhost:*)",
+      "Bash(curl -s -X POST localhost:*)",
+      "Bash(curl -s -X POST http://localhost:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Edit(app/**)",
+      "Edit(data/**)",
+      "Edit(frontend/**)",
+      "Edit(scripts/**)",
+      "Edit(README.md)",
+      "Edit(requirements.txt)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Bash(git push:*)"
+    ]
+  }
+}
