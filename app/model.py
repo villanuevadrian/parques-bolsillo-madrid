@@ -25,6 +25,7 @@ CELDA_M = 100
 class Modelo:
     def __init__(self):
         self.distritos = pd.read_csv(DATA / "distritos.csv")
+        self.barrios = pd.read_csv(DATA / "barrios.csv")  # ranking real de los 131 barrios
         c = pd.read_csv(DATA / "celdas.csv")
         c["densidad"] = c["poblacion"] / c["poblacion"].max()
         c["vulnerables"] = c["poblacion"] * (c["pct_mayores"] + c["pct_menores"])

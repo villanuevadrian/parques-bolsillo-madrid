@@ -39,6 +39,12 @@ def test_ciudad_datos_reales(client):
     assert 0 < tetuan["m2_hab"] < 10
 
 
+def test_detecta_131_barrios(client):
+    b = client.get("/barrios").json()
+    assert len(b) == 131
+    assert b[0]["prioridad"] >= b[-1]["prioridad"]  # ordenados de mayor a menor prioridad
+
+
 def test_poblacion_calibrada_con_padron():
     assert abs(modelo.celdas["poblacion"].sum() - 167_776) < 50  # Tetuán, padrón 1-ene-2026
 

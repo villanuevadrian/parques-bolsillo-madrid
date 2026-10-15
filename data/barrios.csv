@@ -1,0 +1,132 @@
+cod_distrito,distrito,cod_barrio,barrio,poblacion,ranking_vulnerabilidad,m2_hab_distrito,prioridad,puesto
+13,Puente de Vallecas,132,San Diego,51351,2,10.78,0.811,1
+13,Puente de Vallecas,131,Entrevías,37773,3,10.78,0.806,2
+13,Puente de Vallecas,135,Portazgo,30348,4,10.78,0.802,3
+13,Puente de Vallecas,136,Numancia,51578,5,10.78,0.797,4
+11,Carabanchel,113,San Isidro,42556,13,8.68,0.796,5
+12,Usera,127,Pradolongo,20316,6,10.76,0.793,6
+6,Tetuán,64,Almenara,24271,33,3.69,0.789,7
+13,Puente de Vallecas,134,Palomeras Sureste,44822,7,10.78,0.788,8
+17,Villaverde,172,San Cristóbal,19732,1,12.45,0.787,9
+13,Puente de Vallecas,133,Palomeras Bajas,42052,8,10.78,0.783,10
+11,Carabanchel,115,Puerta Bonita,39269,16,8.68,0.782,11
+12,Usera,122,Orcasur,15036,10,10.76,0.774,12
+12,Usera,124,Almendrales,24801,11,10.76,0.77,13
+12,Usera,126,Zofío,15528,12,10.76,0.765,14
+1,Centro,12,Embajadores,48085,45,2.09,0.761,15
+11,Carabanchel,114,Vista Alegre,50465,21,8.68,0.759,16
+6,Tetuán,66,Berruguete,27136,40,3.69,0.757,17
+12,Usera,125,Moscardó,28874,14,10.76,0.756,18
+11,Carabanchel,117,Abrantes,33425,22,8.68,0.755,19
+17,Villaverde,171,"Villaverde Alto, Casco Histórico de Villaverde",51913,9,12.45,0.75,20
+6,Tetuán,65,Valdeacederas,28641,43,3.69,0.743,21
+12,Usera,123,San Fermín,24705,17,10.76,0.742,22
+11,Carabanchel,112,Opañel,35843,25,8.68,0.741,23
+20,San Blas-Canillejas,203,Amposta,10349,19,10.27,0.741,24
+11,Carabanchel,111,Comillas,24009,26,8.68,0.736,25
+6,Tetuán,61,Bellas Vistas,30751,46,3.69,0.729,26
+17,Villaverde,175,Ángeles,38259,15,12.45,0.722,27
+12,Usera,121,Orcasitas,23677,23,10.76,0.714,28
+11,Carabanchel,116,Buenavista,52523,32,8.68,0.708,29
+20,San Blas-Canillejas,202,Hellín,10272,27,10.27,0.704,30
+1,Centro,16,Sol,8099,58,2.09,0.701,31
+17,Villaverde,174,Los Rosales,39454,20,12.45,0.699,32
+10,Latina,101,Los Cármenes,18562,28,10.39,0.698,33
+15,Ciudad Lineal,151,Ventas,52396,47,5.55,0.693,34
+10,Latina,102,Puerta del Ángel,45854,30,10.39,0.688,35
+10,Latina,103,Lucero,38150,31,10.39,0.684,36
+15,Ciudad Lineal,152,Pueblo Nuevo,65545,49,5.55,0.683,37
+1,Centro,15,Universidad,33326,62,2.09,0.683,38
+1,Centro,11,Palacio,23410,63,2.09,0.678,39
+15,Ciudad Lineal,153,Quintana,26752,51,5.55,0.674,40
+1,Centro,13,Cortes,10740,64,2.09,0.673,41
+10,Latina,104,Aluche,68548,35,10.39,0.665,42
+1,Centro,14,Justicia,18140,66,2.09,0.664,43
+20,San Blas-Canillejas,204,Arcos,26309,36,10.27,0.663,44
+17,Villaverde,173,Butarque,23193,29,12.45,0.658,45
+20,San Blas-Canillejas,201,Simancas,30614,38,10.27,0.653,46
+20,San Blas-Canillejas,207,Canillejas,30418,39,10.27,0.649,47
+10,Latina,107,Águilas,52226,41,10.39,0.638,48
+14,Moratalaz,145,Fontarrón,17957,34,12.27,0.638,49
+10,Latina,105,Campamento,20742,42,10.39,0.633,50
+15,Ciudad Lineal,154,La Concepción,22387,61,5.55,0.628,51
+15,Ciudad Lineal,155,San Pascual,19141,65,5.55,0.61,52
+6,Tetuán,62,Cuatro Caminos,35788,73,3.69,0.605,53
+14,Moratalaz,141,Pavones,9111,44,12.27,0.592,54
+6,Tetuán,63,Castillejos,21189,76,3.69,0.591,55
+2,Arganzuela,23,Chopera,20366,69,5.76,0.588,56
+10,Latina,106,Cuatro Vientos,7057,54,10.39,0.578,57
+14,Moratalaz,146,Vinateros,17203,52,12.27,0.555,58
+7,Chamberí,71,Gaztambide,23670,95,0.7,0.554,59
+20,San Blas-Canillejas,206,Rejas,18584,60,10.27,0.552,60
+2,Arganzuela,26,Palos de la Frontera,25737,77,5.76,0.551,61
+14,Moratalaz,144,Media Legua,17616,53,12.27,0.55,62
+7,Chamberí,73,Trafalgar,25114,96,0.7,0.55,63
+7,Chamberí,72,Arapiles,24883,97,0.7,0.545,64
+4,Salamanca,43,Fuente del Berro,21462,92,2.37,0.539,65
+19,Vicálvaro,191,Casco Histórico de Vicálvaro,37777,24,20.89,0.536,66
+2,Arganzuela,27,Atocha,2939,81,5.76,0.532,67
+15,Ciudad Lineal,157,Colina,6812,82,5.55,0.531,68
+18,Villa de Vallecas,181,Casco Histórico de Vallecas,43518,18,23.37,0.522,69
+14,Moratalaz,143,Marroquina,26140,59,12.27,0.522,70
+2,Arganzuela,25,Delicias,29210,85,5.76,0.514,71
+15,Ciudad Lineal,156,San Juan Bautista,13235,86,5.55,0.513,72
+7,Chamberí,75,Ríos Rosas,28065,104,0.7,0.513,73
+5,Chamartín,52,Prosperidad,36910,93,3.76,0.511,74
+5,Chamartín,53,Ciudad Jardín,18807,94,3.76,0.506,75
+2,Arganzuela,22,Acacias,36069,87,5.76,0.504,76
+16,Hortaleza,164,Pinar del Rey,53458,56,14.2,0.503,77
+2,Arganzuela,21,Imperial,24313,88,5.76,0.5,78
+3,Retiro,31,Pacífico,33838,98,3.09,0.499,79
+20,San Blas-Canillejas,208,El Salvador,11580,72,10.27,0.497,80
+15,Ciudad Lineal,159,Costillares,22376,90,5.55,0.494,81
+3,Retiro,32,Adelfas,18892,100,3.09,0.49,82
+20,San Blas-Canillejas,205,Rosas,30400,74,10.27,0.487,83
+3,Retiro,34,Ibiza,21589,102,3.09,0.481,84
+4,Salamanca,44,Guindalera,43038,105,2.37,0.479,85
+14,Moratalaz,142,Horcajo,6378,70,12.27,0.472,86
+7,Chamberí,74,Almagro,19404,115,0.7,0.462,87
+4,Salamanca,45,Lista,21108,109,2.37,0.461,88
+7,Chamberí,76,Vallehermoso,20386,117,0.7,0.453,89
+4,Salamanca,42,Goya,29627,112,2.37,0.447,90
+21,Barajas,212,Aeropuerto,1928,55,18.06,0.442,91
+8,Fuencarral-El Pardo,84,Pilar,46659,68,14.52,0.442,92
+18,Villa de Vallecas,182,Santa Eugenia,23919,37,23.37,0.434,93
+16,Hortaleza,165,Apóstol Santiago,15702,71,14.2,0.434,94
+5,Chamartín,56,Castilla,17592,110,3.76,0.433,95
+19,Vicálvaro,192,Valdebernardo,17260,48,20.89,0.426,96
+15,Ciudad Lineal,158,Atalaya,1690,106,5.55,0.42,97
+2,Arganzuela,24,Legazpi,19916,108,5.76,0.408,98
+16,Hortaleza,163,Canillas,40494,78,14.2,0.402,99
+3,Retiro,33,Estrella,22692,119,3.09,0.402,100
+4,Salamanca,46,Castellana,16798,123,2.37,0.396,101
+8,Fuencarral-El Pardo,81,El Pardo,3472,79,14.52,0.391,102
+21,Barajas,213,Casco Histórico de Barajas,8600,67,18.06,0.386,103
+19,Vicálvaro,194,El Cañaveral,24945,57,20.89,0.384,104
+3,Retiro,35,Los Jerónimos,6774,124,3.09,0.379,105
+9,Moncloa-Aravaca,94,Valdezarza,31799,80,15.16,0.376,106
+18,Villa de Vallecas,183,Ensanche de Vallecas,60129,50,23.37,0.374,107
+8,Fuencarral-El Pardo,83,Peñagrande,45120,83,14.52,0.373,108
+4,Salamanca,41,Recoletos,15223,129,2.37,0.369,109
+8,Fuencarral-El Pardo,86,Valverde,67737,84,14.52,0.368,110
+5,Chamartín,54,Hispanoamérica,32016,125,3.76,0.363,111
+3,Retiro,36,Niño Jesús,15078,128,3.09,0.361,112
+5,Chamartín,55,Nueva España,25402,130,3.76,0.34,113
+5,Chamartín,51,El Viso,17366,131,3.76,0.336,114
+9,Moncloa-Aravaca,91,Casa de Campo,13530,89,15.16,0.334,115
+19,Vicálvaro,193,Valderrivas,17878,75,20.89,0.301,116
+8,Fuencarral-El Pardo,85,La Paz,31835,99,14.52,0.299,117
+16,Hortaleza,166,Valdefuentes,77038,101,14.2,0.295,118
+21,Barajas,214,Timón,12401,91,18.06,0.276,119
+9,Moncloa-Aravaca,92,Argüelles,24802,103,15.16,0.27,120
+16,Hortaleza,161,Palomas,7118,107,14.2,0.268,121
+8,Fuencarral-El Pardo,82,Fuentelarreina,3567,113,14.52,0.235,122
+16,Hortaleza,162,Piovera,15368,116,14.2,0.226,123
+9,Moncloa-Aravaca,93,Ciudad Universitaria,17077,114,15.16,0.219,124
+8,Fuencarral-El Pardo,87,Mirasierra,37918,118,14.52,0.211,125
+8,Fuencarral-El Pardo,88,El Goloso,19729,121,14.52,0.198,126
+9,Moncloa-Aravaca,97,Aravaca,28183,120,15.16,0.191,127
+21,Barajas,211,Alameda de Osuna,20023,111,18.06,0.183,128
+9,Moncloa-Aravaca,96,El Plantío,3161,126,15.16,0.164,129
+9,Moncloa-Aravaca,95,Valdemarín,7705,127,15.16,0.159,130
+21,Barajas,215,Corralejos,7661,122,18.06,0.132,131

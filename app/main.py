@@ -34,6 +34,12 @@ def ciudad():
     return modelo.distritos.to_dict("records")
 
 
+@app.get("/barrios")
+def barrios(n: int = 131):
+    """Detección: los 131 barrios de Madrid ordenados por prioridad (vulnerabilidad + déficit verde), datos reales."""
+    return modelo.barrios.head(n).to_dict("records")
+
+
 @app.get("/diagnostico")
 def diagnostico():
     return {"celdas": modelo.diagnostico(), "barrios": modelo.resumen_barrios(),

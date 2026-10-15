@@ -45,6 +45,22 @@ d["m2_hab"] = (d["m2_verde"] / d["poblacion"]).round(2)
 d["m2_verde"] = d["m2_verde"].round(0)
 d.sort_values("m2_hab").to_csv(OUT / "distritos.csv", index=False)
 
+# ---------- 1b. Detección de barrios: 131 barrios, 100% datos reales ----------
+# El verde solo se publica por distrito: cada barrio hereda el m²/hab de su distrito.
+vb_all = vul_b.copy()
+vb_all["cod_barrio"] = vb_all["BARRIO"].str.strip().str.split(".", n=1, regex=False).str[0].astype(int)
+b = pob[["cod_distrito", "distrito", "cod_barrio", "barrio", "num_personas"]].copy()
+b[["distrito", "barrio"]] = b[["distrito", "barrio"]].apply(lambda s: s.str.strip())
+b = b.merge(vb_all[["cod_barrio", "Ranking"]], on="cod_barrio", how="left")
+b = b.merge(d[["distrito", "m2_hab"]], on="distrito", how="left")
+b = b.rename(columns={"num_personas": "poblacion", "Ranking": "ranking_vulnerabilidad", "m2_hab": "m2_hab_distrito"})
+vul_norm = 1 - (b["ranking_vulnerabilidad"] - 1) / 130            # 1 = el más vulnerable
+verde_norm = 1 - b["m2_hab_distrito"] / b["m2_hab_distrito"].max()  # 1 = el que menos verde tiene
+b["prioridad"] = (0.6 * vul_norm + 0.4 * verde_norm).round(3)
+b = b.dropna(subset=["prioridad"]).sort_values("prioridad", ascending=False)
+b["puesto"] = range(1, len(b) + 1)
+b.to_csv(OUT / "barrios.csv", index=False)
+
 # ---------- 2. Tetuán: cuadrícula sintética de 100 m calibrada ----------
 COD_TETUAN = 6
 barrios = pob[pob["cod_distrito"] == COD_TETUAN][["barrio", "num_personas"]].copy()

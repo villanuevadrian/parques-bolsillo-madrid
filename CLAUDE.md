@@ -3,7 +3,9 @@ Prueba técnica de 2 horas (Líderes Digitales, Telefónica). Objetivo: MVP func
 innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/escalabilidad (15).
 
 # Proyecto
-- `data/generate.py` → CSV sintético. `app/model.py` → RandomForest + IsolationForest.
+- Reto #42: detectar barrios con déficit verde y proponer parques bolsillo. Usuario: técnico del Ayuntamiento.
+- `data/generate.py` → datos reales (data/raw, datos.madrid.es) + cuadrícula sintética de Tetuán.
+- `app/model.py` → RandomForest de temperatura + índice de déficit + optimizador (voraz + recocido simulado).
 - `app/llm.py` → explicación con LLM, SIEMPRE con fallback (la demo no puede caerse).
 - `app/main.py` → FastAPI. `frontend/streamlit_app.py` → UI accesible + pestaña "Sobre el proyecto".
 - Arranque: `python data/generate.py`, `uvicorn app.main:app --reload`, `streamlit run frontend/streamlit_app.py`.

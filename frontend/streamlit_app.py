@@ -94,8 +94,20 @@ with tabs[0]:
             "tienen menos verde, pero son menos vulnerables: los m²/habitante por sí solos no bastan.")
     st.caption("Fuente: datos.madrid.es — Superficie de zonas verdes por distrito (2025), Población por distrito "
                "y barrio (1-ene-2026), Ranking de vulnerabilidad (2020). No incluye parques históricos como el Retiro.")
-    with st.expander("Ver tabla de datos"):
+    with st.expander("Ver tabla de distritos"):
         st.dataframe(ciudad, hide_index=True)
+
+    st.subheader("Detección: barrios con más prioridad de los 131 de Madrid")
+    top = pd.DataFrame(api("/barrios", params={"n": 15}))
+    st.bar_chart(top.set_index("barrio")["prioridad"], horizontal=True)
+    st.caption(f"Descripción del gráfico: {top.iloc[0]['barrio']} ({top.iloc[0]['distrito']}) es el barrio con más "
+               "prioridad. Prioridad = 60 % vulnerabilidad del barrio + 40 % déficit verde de su distrito. "
+               f"El primero de Tetuán es {top[top['distrito'] == 'Tetuán'].iloc[0]['barrio'] if (top['distrito'] == 'Tetuán').any() else '—'}.")
+    st.dataframe(top[["puesto", "barrio", "distrito", "poblacion", "ranking_vulnerabilidad", "m2_hab_distrito",
+                      "prioridad"]].rename(columns={"ranking_vulnerabilidad": "puesto vulnerabilidad (de 131)",
+                                                    "m2_hab_distrito": "m² verde/hab del distrito"}), hide_index=True)
+    st.caption("Escala: distrito para priorizar → barrio para detectar → manzana de 100 m para decidir dónde intervenir "
+               "(pestañas siguientes, en Tetuán).")
 
 # ---------- 2. Diagnóstico Tetuán ----------
 with tabs[1]:
