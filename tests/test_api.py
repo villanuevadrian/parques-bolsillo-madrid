@@ -174,3 +174,11 @@ def test_diseno_respeta_superficie_y_presupuesto(resultado):
         assert d["elementos"], "cada parque debe tener al menos un elemento"
         assert d["m2_usados"] <= d["m2_disponibles"]
         assert d["coste_equipamiento"] <= d["presupuesto_equipamiento"]
+
+
+
+def test_escenarios_rendimientos_decrecientes(client):
+    e = client.get("/escenarios", params={"distrito": "Tetuán"}).json()["escenarios"]
+    pct = [x["pct_vulnerables_300m"] for x in e]
+    assert pct == sorted(pct)                         # más presupuesto nunca empeora
+    assert e[0]["pp_por_100k"] > e[-1]["pp_por_100k"]  # el primer euro rinde más que el último

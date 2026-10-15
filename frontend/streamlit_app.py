@@ -101,6 +101,44 @@ def validacion(distrito: str, presupuesto: int) -> dict:
 
 
 @st.cache_data(ttl=600, show_spinner=False)
+def escenarios(distrito: str) -> dict:
+    return api("/escenarios", params={"distrito": distrito})
+
+
+def informe_md(r: dict, distrito: str) -> str:
+    """Informe descargable para el pleno de la Junta de Distrito (Markdown: se abre en cualquier editor)."""
+    a, d = r["kpis_antes"], r["kpis_despues"]
+    n = lambda x: f"{x:,.0f}".replace(",", ".")  # noqa: E731  miles con punto
+    filas = "\n".join(
+        f"| {p['id']} | {p['barrio']} | {p['tipo']} | {p['m2']} | {n(p['coste'])} | {n(p['nuevos_vulnerables_300m'])} | "
+        f"{p['bajada_temp_c']} | {'; '.join(e['elemento'] for e in p['diseno']['elementos'])} |" for p in r["seleccion"])
+    restr = "\n".join(f"- {'Cumple' if x['ok'] else 'NO cumple'}: {nombre} = {n(x['valor'])} (límite {n(x['limite'])})"
+                       for nombre, x in r["restricciones"].items())
+    return f"""# Propuesta de parques bolsillo — {distrito}
+
+## Resumen
+- Mayores y niños con espacio verde (≥0,5 ha, criterio OMS) o parque bolsillo a <300 m: **{a['pct_vulnerables_300m']} % → {d['pct_vulnerables_300m']} %**
+- Parques: {d['parques']} · Inversión: {n(d['inversion'])} € · Vecinos con calles más frescas: {n(d['personas_refrescadas'])}
+
+## Justificación
+{r['explicacion']['texto']}
+
+## Cartera propuesta
+| # | Barrio | Tipo | m² | Coste (€) | Mayores y niños nuevos a <300 m | °C menos | Qué construir |
+|---|---|---|---|---|---|---|---|
+{filas}
+
+## Restricciones
+{restr}
+
+## Método
+Optimización de cobertura máxima con presupuesto (voraz + recocido simulado, validado frente al óptimo exacto por
+programación lineal entera). Diseño de cada parque: mochila exacta sobre 8 micro-intervenciones. Datos: datos.madrid.es
+(padrón 2026, vulnerabilidad, límites de barrios, parques) y OpenStreetMap (contornos de zonas verdes).
+"""
+
+
+@st.cache_data(ttl=600, show_spinner=False)
 def impacto_ejemplo(distrito: str) -> dict:
     return api("/optimizar", "post", json={"distrito": distrito, "presupuesto": 500_000})
 
@@ -256,6 +294,18 @@ with tabs[2]:
         st.caption(f"Fuente de la explicación: {r['explicacion']['fuente']}")
         leer_en_voz_alta(r["explicacion"]["texto"], "leer_cartera")
 
+        st.download_button("📄 Descargar informe para el pleno", informe_md(r, distrito),
+                           file_name=f"informe_parques_bolsillo_{distrito}.md", mime="text/markdown")
+        if st.toggle("📈 Ver escenarios de presupuesto (rendimientos decrecientes)"):
+            with st.spinner("Optimizando 7 presupuestos…"):
+                esc = escenarios(distrito)
+            e = pd.DataFrame(esc["escenarios"])
+            st.line_chart(e.set_index("presupuesto")["pct_vulnerables_300m"])
+            st.dataframe(e.rename(columns={"pct_vulnerables_300m": "% mayores y niños a <300 m",
+                                           "pp_por_100k": "puntos ganados por cada 100.000 € extra"}), hide_index=True)
+            st.caption(f"Descripción del gráfico: partiendo del {esc['base']} %, los primeros 100.000 € aportan "
+                       f"{e.iloc[0]['pp_por_100k']} puntos por cada 100.000 €; con {e.iloc[-1]['presupuesto']:,} € el "
+                       f"último tramo aporta {e.iloc[-1]['pp_por_100k']}. Ayuda a decidir hasta dónde compensa invertir.".replace(",", "."))
         pres_cartera = int(r["restricciones"]["presupuesto"]["limite"])  # el de la cartera mostrada, no el del slider
         if st.toggle("🔬 Validar el algoritmo frente al óptimo exacto"):
             with st.spinner("Resolviendo el óptimo exacto (programación lineal entera)…"):

@@ -76,6 +76,26 @@ def optimizar(p: Peticion):
     return r
 
 
+@app.get("/escenarios")
+def escenarios(distrito: str = "Tetuán"):
+    """Curva presupuesto -> % de mayores y niños con verde a <300 m (mismas restricciones por defecto)."""
+    m = get_modelo(distrito)
+    pesos = {"cobertura": 1, "equidad": 1, "calor": 1}
+    out = []
+    for pres in (100_000, 250_000, 500_000, 750_000, 1_000_000, 1_500_000, 2_000_000):
+        lim = {"presupuesto": pres, "max_plazas": 10, "max_mantenimiento": 20_000 * pres / 500_000,
+               "min_equidad_pct": 60}
+        r = m.optimizar(lim, pesos)
+        out.append({"presupuesto": pres, "pct_vulnerables_300m": float(r["kpis_despues"]["pct_vulnerables_300m"]),
+                    "parques": r["kpis_despues"]["parques"], "inversion": r["kpis_despues"]["inversion"]})
+    base = float(m.kpis([])["pct_vulnerables_300m"])
+    prev_p, prev_v = 0, base
+    for e in out:  # puntos porcentuales ganados por cada 100.000 € adicionales
+        e["pp_por_100k"] = round(float(e["pct_vulnerables_300m"] - prev_v) / max(e["presupuesto"] - prev_p, 1) * 100_000, 2)
+        prev_p, prev_v = e["presupuesto"], e["pct_vulnerables_300m"]
+    return {"base": base, "escenarios": out}
+
+
 @app.get("/validacion")
 def validacion(distrito: str = "Tetuán", presupuesto: int = 500_000):
     """Compara voraz y recocido con el óptimo exacto (programación lineal entera, HiGHS) y con carteras al azar."""
