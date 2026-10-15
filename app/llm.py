@@ -1,4 +1,6 @@
-"""Capa LLM: convierte la predicción en una explicación para el ciudadano.
+"""Capa LLM: convierte la propuesta del optimizador en texto para cada público.
+- "pleno": informe justificativo para el técnico municipal (lo presenta en la Junta de Distrito).
+- "facil": ficha en lectura fácil para vecinos y personas mayores.
 SIEMPRE tiene fallback: sin API key, sin internet o con error -> texto por plantilla.
 La demo nunca se cae por la IA.
 """
@@ -8,40 +10,66 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ESTILOS = {
-    "normal": "Explica en 3 frases claras, con una recomendación práctica.",
-    "facil": "Usa lectura fácil: frases muy cortas, palabras sencillas, sin tecnicismos ni cifras complicadas. Pensado para personas mayores.",
+    "pleno": "Redacta un informe técnico breve (máx. 120 palabras) para justificar la inversión ante el pleno "
+             "de la Junta de Distrito: impacto, equidad, restricciones cumplidas y una recomendación.",
+    "facil": "Usa lectura fácil: frases muy cortas, palabras sencillas, sin tecnicismos ni cifras complicadas. "
+             "Pensado para vecinos y personas mayores. Máx. 60 palabras.",
 }
 
 
-def _fallback(pred: dict, estilo: str, idioma: str) -> str:
-    v, d, n = pred["no2_predicho"], pred["distrito"], pred["nivel"]
-    consejo = {
-        "bueno": ("Buen momento para pasear o ir en bici.", "Good time for a walk or a bike ride."),
-        "moderado": ("Si eres sensible, evita hacer ejercicio intenso en la calle.", "If you are sensitive, avoid intense outdoor exercise."),
-        "alto": ("Evita la actividad al aire libre y usa transporte público.", "Avoid outdoor activity and use public transport."),
-    }[n][0 if idioma == "es" else 1]
+def _n(x) -> str:
+    """Miles con punto (formato español): 12500 -> 12.500."""
+    return f"{x:,.0f}".replace(",", ".")
+
+
+def _fallback_cartera(r: dict, estilo: str, idioma: str) -> str:
+    a, d, n = r["kpis_antes"], r["kpis_despues"], r["kpis_despues"]["parques"]
     if idioma == "en":
-        return f"Air quality in {d}: {n.upper()} ({v} µg/m³ NO₂). {consejo}"
+        return (f"{n} pocket parks for €{d['inversion']:,}. Vulnerable residents (65+ and under 12) with green space "
+                f"within 300 m rise from {a['pct_vulnerables_300m']}% to {d['pct_vulnerables_300m']}%. "
+                f"{d['personas_refrescadas']:,} people get cooler streets in heat waves.")
     if estilo == "facil":
-        return f"El aire en {d} está {n.upper()}. {consejo}"
-    return f"Se prevén {v} µg/m³ de NO₂ en {d} (nivel {n}). El factor que más influye es el tráfico. {consejo}"
+        return (f"Vamos a crear {n} parques pequeños en Tetuán. Más mayores y niños tendrán un parque cerca de casa. "
+                f"En verano, sus calles estarán más frescas.")
+    ok = sum(x["ok"] for x in r["restricciones"].values())
+    return (f"Se proponen {n} parques bolsillo con una inversión de {_n(d['inversion'])} €. La población vulnerable "
+            f"(mayores de 65 y menores de 12) con zona verde a menos de 300 m pasa del {a['pct_vulnerables_300m']}% "
+            f"al {d['pct_vulnerables_300m']}%, y {_n(d['personas_refrescadas'])} vecinos se benefician de calles más "
+            f"frescas en olas de calor. Se cumplen {ok} de {len(r['restricciones'])} restricciones. "
+            f"Recomendación: aprobar la cartera y medir el efecto con sensores IoT de temperatura.")
 
 
-def explicar(pred: dict, estilo: str = "normal", idioma: str = "es") -> dict:
+def _fallback_parque(p: dict, estilo: str, idioma: str) -> str:
+    if idioma == "en":
+        return (f"New pocket park in {p['barrio']} ({p['m2']} m²). {p['nuevos_vecinos_300m']:,} people will have "
+                f"green space within 300 m. Streets around it will be about {p['bajada_temp_c']} °C cooler in summer.")
+    if estilo == "facil":
+        return (f"Habrá un parque nuevo en {p['barrio']}. Estará cerca de tu casa. Tendrá sombra y bancos. "
+                f"En verano, la calle estará más fresca.")
+    return (f"Parque bolsillo en {p['barrio']} ({p['tipo'].lower()}, {p['m2']} m², {_n(p['coste'])} €). "
+            f"{_n(p['nuevos_vecinos_300m'])} vecinos ganan zona verde a menos de 300 m, de ellos "
+            f"{_n(p['nuevos_vulnerables_300m'])} mayores o niños. Bajada estimada de {p['bajada_temp_c']} °C en las "
+            f"calles cercanas. Coste por vecino beneficiado: {p['coste_por_vecino']} €.")
+
+
+def explicar(datos: dict, tipo: str = "cartera", estilo: str = "pleno", idioma: str = "es") -> dict:
+    """tipo: 'cartera' (resultado del optimizador) o 'parque' (un parque concreto)."""
+    fallback = _fallback_cartera if tipo == "cartera" else _fallback_parque
     key = os.getenv("ANTHROPIC_API_KEY")
     if not key:
-        return {"texto": _fallback(pred, estilo, idioma), "fuente": "plantilla"}
+        return {"texto": fallback(datos, estilo, idioma), "fuente": "plantilla"}
     try:
         import anthropic
         client = anthropic.Anthropic(api_key=key, timeout=15)
         msg = client.messages.create(
             model=os.getenv("LLM_MODEL", "claude-haiku-4-5"),
-            max_tokens=250,
+            max_tokens=350,
             messages=[{"role": "user", "content": (
-                f"Eres un asistente de calidad del aire del Ayuntamiento de Madrid. "
-                f"Idioma de respuesta: {'español' if idioma == 'es' else 'inglés'}. {ESTILOS[estilo]}\n"
-                f"Datos del modelo: {pred}")}],
+                "Eres el asistente de planificación de zonas verdes del Ayuntamiento de Madrid (distrito de Tetuán). "
+                f"Idioma de respuesta: {'español' if idioma == 'es' else 'inglés'}. {ESTILOS[estilo]} "
+                "Usa solo los datos facilitados, no inventes cifras.\n"
+                f"Datos: {datos}")}],
         )
         return {"texto": msg.content[0].text, "fuente": "llm"}
     except Exception as e:  # noqa: BLE001  — cualquier fallo -> fallback
-        return {"texto": _fallback(pred, estilo, idioma), "fuente": f"plantilla ({type(e).__name__})"}
+        return {"texto": fallback(datos, estilo, idioma), "fuente": f"plantilla ({type(e).__name__})"}

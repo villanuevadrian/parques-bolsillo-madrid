@@ -6,41 +6,56 @@ from pydantic import BaseModel, Field
 from app.llm import explicar
 from app.model import Modelo
 
-app = FastAPI(title="Smart City API", version="0.1")
-modelo = Modelo()  # se entrena al arrancar (segundos)
+app = FastAPI(title="Parques bolsillo — API de decisión", version="0.2")
+modelo = Modelo()  # entrena el modelo de temperatura y precalcula coberturas al arrancar (segundos)
 
 
-class Entrada(BaseModel):
-    distrito: str
-    hora: int = Field(ge=0, le=23)
-    dia_semana: int = Field(ge=0, le=6)
-    trafico: float = Field(ge=0, le=1.5)
-    temperatura: float = Field(ge=-10, le=50)
-    viento: float = Field(ge=0, le=40)
-    estilo: Literal["normal", "facil"] = "normal"
+class Peticion(BaseModel):
+    presupuesto: int = Field(500_000, ge=50_000, le=5_000_000)
+    max_plazas: int = Field(10, ge=0, le=200)
+    max_mantenimiento: int = Field(20_000, ge=0, le=500_000)
+    min_equidad_pct: float = Field(60, ge=0, le=100)
+    peso_cobertura: float = Field(1, ge=0, le=5)
+    peso_equidad: float = Field(1, ge=0, le=5)
+    peso_calor: float = Field(1, ge=0, le=5)
+    estilo: Literal["pleno", "facil"] = "pleno"
     idioma: Literal["es", "en"] = "es"
 
 
 @app.get("/health")
 def health():
-    return {"ok": True, "mae": modelo.mae, "distritos": modelo.distritos}
+    return {"ok": True, "mae_temperatura": modelo.mae, "candidatos": len(modelo.cand),
+            "barrios": sorted(modelo.celdas["barrio"].unique())}
 
 
-@app.post("/predict")
-def predict(e: Entrada):
-    if e.distrito not in modelo.distritos:
-        raise HTTPException(404, f"Distrito desconocido. Opciones: {modelo.distritos}")
-    pred = modelo.predecir(e.distrito, e.hora, e.dia_semana, e.trafico, e.temperatura, e.viento)
-    pred["explicacion"] = explicar(pred, e.estilo, e.idioma)
-    return pred
+@app.get("/ciudad")
+def ciudad():
+    """Diagnóstico de los 21 distritos con datos abiertos reales del Ayuntamiento."""
+    return modelo.distritos.to_dict("records")
 
 
-@app.get("/anomalies")
-def anomalies(n: int = 20):
-    return modelo.anomalias(n)
+@app.get("/diagnostico")
+def diagnostico():
+    return {"celdas": modelo.diagnostico(), "barrios": modelo.resumen_barrios(),
+            "kpis": modelo.kpis([]), "importancias": modelo.importancias()}
 
 
-@app.get("/stats")
-def stats():
-    return {"distritos": modelo.resumen_distritos(), "perfil_horario": modelo.perfil_horario(),
-            "importancias": modelo.importancias(), "mae": modelo.mae}
+@app.post("/optimizar")
+def optimizar(p: Peticion):
+    lim = {"presupuesto": p.presupuesto, "max_plazas": p.max_plazas,
+           "max_mantenimiento": p.max_mantenimiento, "min_equidad_pct": p.min_equidad_pct}
+    pesos = {"cobertura": p.peso_cobertura, "equidad": p.peso_equidad, "calor": p.peso_calor}
+    if sum(pesos.values()) == 0:
+        raise HTTPException(422, "Al menos una prioridad debe tener peso mayor que 0")
+    r = modelo.optimizar(lim, pesos)
+    r["explicacion"] = explicar(r, "cartera", p.estilo, p.idioma)
+    return r
+
+
+@app.get("/parque/{pid}")
+def parque(pid: int, estilo: Literal["pleno", "facil"] = "pleno", idioma: Literal["es", "en"] = "es"):
+    if pid not in modelo.cand.index:
+        raise HTTPException(404, f"Parque candidato {pid} no existe")
+    d = modelo.detalle([pid])[0]
+    d["explicacion"] = explicar(d, "parque", estilo, idioma)
+    return d

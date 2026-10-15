@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Prueba de humo de punta a punta: datos + API + Streamlit (sin navegador).
 # Uso: ./scripts/smoke.sh   (usa el puerto 8001 para no chocar con tu API en 8000)
-# Tras cambiar de dominio, ajusta PREDICT_BODY a los campos nuevos de /predict.
+# Tras cambiar de dominio, ajusta PREDICT_BODY a los campos de /optimizar.
 set -u
 cd "$(dirname "$0")/.."
 PY=.venv/bin/python
 PORT=${PORT:-8001}
 API="http://localhost:$PORT"
-PREDICT_BODY='{"distrito":"Centro","hora":9,"dia_semana":1,"trafico":0.9,"temperatura":25,"viento":3}'
+PREDICT_BODY='{"presupuesto":500000}'
 FALLOS=0
 ok()  { echo "  ✅ $1"; }
 mal() { echo "  ❌ $1"; FALLOS=$((FALLOS + 1)); }
@@ -31,15 +31,15 @@ if ! curl -sf "$API/health" >/dev/null; then
 fi
 ok "/health  $(curl -s "$API/health" | head -c 120)"
 
-BODY=$(curl -s -w '\n%{http_code}' -X POST "$API/predict" -H 'Content-Type: application/json' -d "$PREDICT_BODY")
+BODY=$(curl -s -w '\n%{http_code}' -X POST "$API/optimizar" -H 'Content-Type: application/json' -d "$PREDICT_BODY")
 CODE=${BODY##*$'\n'}; BODY=${BODY%$'\n'*}
 if [ "$CODE" = 200 ]; then
-  ok "/predict  $(echo "$BODY" | head -c 150)…"
+  ok "/optimizar  $(echo "$BODY" | head -c 150)…"
   echo "     fuente de la explicación: $(echo "$BODY" | $PY -c "import sys,json; print(json.load(sys.stdin)['explicacion']['fuente'])")  (llm = Claude; plantilla = fallback)"
 else
-  mal "/predict HTTP $CODE: $BODY"
+  mal "/optimizar HTTP $CODE: $BODY"
 fi
-for p in /anomalies /stats; do
+for p in /ciudad /diagnostico /parque/0; do
   C=$(curl -s -o /dev/null -w '%{http_code}' "$API$p")
   [ "$C" = 200 ] && ok "$p" || mal "$p HTTP $C"
 done
