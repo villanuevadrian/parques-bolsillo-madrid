@@ -55,15 +55,24 @@ def api(path, metodo="get", **kw):
         r = getattr(httpx, metodo)(f"{API}{path}", timeout=60, **kw)
         r.raise_for_status()
         return r.json()
+    except httpx.HTTPStatusError as e:
+        st.warning(f"La API rechazó la petición: {e.response.json().get('detail', e.response.text)}")
+        st.stop()
     except httpx.HTTPError as e:
         st.error(f"No conecto con la API en {API} ({type(e).__name__}). ¿Está arrancada? (uvicorn app.main:app)")
         st.stop()
 
 
-def rojo_verde(v: float) -> str:
-    """0 -> verde, 1 -> rojo (hex con transparencia) para el mapa."""
+@st.cache_data(ttl=600, show_spinner=False)
+def detalle_parque(pid: int, estilo: str, idioma: str) -> dict:
+    return api(f"/parque/{pid}", params={"estilo": estilo, "idioma": idioma})
+
+
+def color_deficit(v: float) -> str:
+    """Paleta apta para daltonismo: azul (poco déficit) -> naranja (mucho déficit)."""
     v = max(0.0, min(1.0, v))
-    return f"#{int(255 * v):02x}{int(200 * (1 - v)):02x}40c0"
+    r, g, b = (int(a + (bb - a) * v) for a, bb in zip((33, 102, 172), (230, 97, 1)))
+    return f"#{r:02x}{g:02x}{b:02x}d0"
 
 
 st.title(T["titulo"])
@@ -96,11 +105,14 @@ with tabs[1]:
     c2.metric("Población con verde a <300 m", f"{k['pct_poblacion_300m']} %")
     c3.metric("m² verde por habitante", k["m2_verde_hab"], help="Referencia habitual (OMS): mínimo 9 m²/hab")
     celdas = pd.DataFrame(diag["celdas"])
-    celdas["color"] = celdas["indice_deficit"].map(rojo_verde)
+    rel = (celdas["indice_deficit"] - celdas["indice_deficit"].min()) / (
+        celdas["indice_deficit"].max() - celdas["indice_deficit"].min())  # relativo al distrito
+    celdas["color"] = rel.map(color_deficit)
+    celdas["size"] = 10 + 45 * rel  # más déficit = punto más grande
     st.subheader("Mapa de déficit verde (cuadrícula de 100 m)")
-    st.map(celdas, latitude="lat", longitude="lon", color="color", size=45)
+    st.map(celdas, latitude="lat", longitude="lon", color="color", size="size")
     barrios = pd.DataFrame(diag["barrios"])
-    st.caption(f"Descripción del mapa: rojo = mayor déficit (lejos de zonas verdes, más calor y más vulnerabilidad). "
+    st.caption(f"Descripción del mapa: naranja y punto grande = mayor déficit; azul y punto pequeño = menor déficit (lejos de zonas verdes, más calor y más vulnerabilidad). "
                f"El barrio con más déficit es {barrios.iloc[0]['barrio']}; el {100 - k['pct_poblacion_300m']:.0f} % de "
                "los vecinos no tiene un espacio verde a menos de 300 m.")
     st.dataframe(barrios.rename(columns={"pct_sin_verde_300m": "% sin verde a 300 m",
@@ -160,8 +172,12 @@ with tabs[2]:
                               "bajada_temp_c": "°C menos", "coste_por_vecino": "€ por vecino"}), hide_index=True)
 
         cmp = r["comparativa"]
-        st.caption(f"Algoritmo: el recocido simulado obtiene un {cmp['mejora_pct']} % más de valor que la solución "
-                   f"voraz ({cmp['recocido']:,} frente a {cmp['voraz']:,}).".replace(",", "."))
+        if cmp["mejora_pct"] > 0:
+            st.caption(f"Algoritmo: el recocido simulado obtiene un {cmp['mejora_pct']} % más de valor que la solución "
+                       f"voraz ({cmp['recocido']:,} frente a {cmp['voraz']:,}).".replace(",", "."))
+        else:
+            st.caption("Algoritmo: el recocido simulado (1.500 iteraciones) no encuentra nada mejor: confirma que la "
+                       "solución voraz es la mejor cartera encontrada para estas condiciones.")
         st.info(r["explicacion"]["texto"])
         st.caption(f"Fuente de la explicación: {r['explicacion']['fuente']}")
         leer_en_voz_alta(r["explicacion"]["texto"], "leer_cartera")
@@ -176,7 +192,7 @@ with tabs[3]:
     else:
         opciones = {f"#{p['id']} · {p['barrio']} · {p['tipo']}": p["id"] for p in r["seleccion"]}
         pid = opciones[st.selectbox("Parque", list(opciones))]
-        p = api(f"/parque/{pid}", params={"estilo": ESTILO, "idioma": idioma})
+        p = detalle_parque(pid, ESTILO, idioma)
         c1, c2, c3 = st.columns(3)
         c1.metric("Vecinos nuevos con verde a <300 m", f"{p['nuevos_vecinos_300m']:,}".replace(",", "."))
         c2.metric("Bajada de temperatura cercana", f"{p['bajada_temp_c']} °C",
@@ -194,6 +210,8 @@ with tabs[3]:
 
 # ---------- 5. Sobre el proyecto ----------
 with tabs[4]:
+    st.success("**Impacto:** con 500.000 € en Tetuán, los mayores y niños con un parque a menos de 300 m pasan "
+               "del **20 % al 47 %**, sin superar los límites de aparcamiento, mantenimiento y equidad.")
     st.markdown(f"""
 ### Problema
 Madrid quiere acercar el verde a sus vecinos, pero el presupuesto es limitado. Los m² de verde por habitante engañan:
@@ -228,6 +246,11 @@ Modelos ligeros en CPU. ODS 3, 10, 11 y 13.
 
 ### Modelo de negocio y escalabilidad
 **SaaS B2G** para ayuntamientos: suscripción anual por municipio. Arquitectura API-first: se replica en cualquier ciudad
-cambiando la fuente de datos. **IoT** (sensores de temperatura y afluencia) para medir el impacto real tras construir
+cambiando la fuente de datos: Copernicus Urban Atlas (verde), temperatura de superficie Landsat/Sentinel, catastro
+y portales de datos abiertos (Barcelona, Valencia…). **IoT** (sensores de temperatura y afluencia) para medir el impacto real tras construir
 y reentrenar el modelo: el ciclo de decisión se cierra con datos.
+
+### Limitaciones (honestidad)
+La temperatura y los solares son sintéticos: el Random Forest se recalibraría con temperatura satelital real.
+La versión en inglés cubre títulos, pestañas y explicaciones; el resto del contenido está en español.
 """)

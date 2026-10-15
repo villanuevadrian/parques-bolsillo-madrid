@@ -82,3 +82,8 @@ def test_entradas_invalidas(client):
     assert client.post("/optimizar", json={**BASE, "peso_cobertura": 0, "peso_equidad": 0,
                                            "peso_calor": 0}).status_code == 422
     assert client.get("/parque/9999").status_code == 404
+
+
+def test_explicacion_en_ingles(client):
+    r = client.post("/optimizar", json={**BASE, "idioma": "en"}).json()
+    assert "pocket parks" in r["explicacion"]["texto"]
