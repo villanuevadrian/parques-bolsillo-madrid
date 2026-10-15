@@ -13,7 +13,8 @@ ESTILOS = {
     "pleno": "Redacta un informe técnico breve (máx. 120 palabras) para justificar la inversión ante el pleno "
              "de la Junta de Distrito: impacto, equidad, restricciones cumplidas y una recomendación.",
     "facil": "Usa lectura fácil: frases muy cortas, palabras sencillas, sin tecnicismos ni cifras complicadas. "
-             "Pensado para vecinos y personas mayores. Máx. 60 palabras.",
+             "Pensado para vecinos y personas mayores. Máx. 60 palabras. Redondea las cifras (p. ej. 'unas 16.000 '"
+             "personas'). No hagas preguntas al lector.",
 }
 
 
@@ -69,7 +70,11 @@ def explicar(datos: dict, tipo: str = "cartera", estilo: str = "pleno", idioma: 
             messages=[{"role": "user", "content": (
                 "Eres el asistente de planificación de zonas verdes del Ayuntamiento de Madrid (el distrito viene en los datos). "
                 f"Idioma de respuesta: {'español' if idioma == 'es' else 'inglés'}. {ESTILOS[estilo]} "
-                "Usa solo los datos facilitados, no inventes cifras.\n"
+                "Usa solo los datos facilitados, no inventes cifras. 'comparativa.mejora_pct' es la mejora del "
+                "recocido simulado frente al algoritmo voraz; 'pct_vulnerables_300m' es el % de mayores y niños con "
+                "verde (criterio OMS) o parque bolsillo nuevo a menos de 300 m; 'personas_refrescadas' son vecinos con calles "
+                "más frescas (no con verde cerca); 'plazas_aparcamiento.valor' son plazas que SÍ se eliminan. "
+                "Sé exacto con estos significados.\n"
                 f"Datos: {datos}")}],
         )
         return {"texto": msg.content[0].text, "fuente": "llm"}
