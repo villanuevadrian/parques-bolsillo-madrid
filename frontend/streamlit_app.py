@@ -105,37 +105,92 @@ def escenarios(distrito: str) -> dict:
     return api("/escenarios", params={"distrito": distrito})
 
 
-def informe_md(r: dict, distrito: str) -> str:
-    """Informe descargable para el pleno de la Junta de Distrito (Markdown: se abre en cualquier editor)."""
+def slug_archivo(s: str) -> str:
+    import unicodedata
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().replace(" ", "_")
+
+
+def _md_a_html(texto: str) -> str:
+    """Markdown mínimo del LLM (títulos, negritas, listas) -> HTML seguro."""
+    import html
+    import re
+    out, en_lista = [], False
+    for linea in texto.splitlines():
+        l = html.escape(linea.strip())
+        l = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", l)
+        if l.startswith(("- ", "* ", "✓", "✅")):
+            if not en_lista:
+                out.append("<ul>"); en_lista = True
+            out.append(f"<li>{l.lstrip('-* ')}</li>")
+            continue
+        if en_lista:
+            out.append("</ul>"); en_lista = False
+        if l.startswith("#"):
+            out.append(f"<h3>{l.lstrip('# ')}</h3>")
+        elif l and l != "---":
+            out.append(f"<p>{l}</p>")
+    return "\n".join(out + (["</ul>"] if en_lista else []))
+
+
+def informe_html(r: dict, distrito: str) -> str:
+    """Informe para el pleno de la Junta de Distrito. HTML con estilo de documento: se imprime a PDF desde el navegador."""
+    import html
+    from datetime import date
     a, d = r["kpis_antes"], r["kpis_despues"]
     n = lambda x: f"{x:,.0f}".replace(",", ".")  # noqa: E731  miles con punto
-    filas = "\n".join(
-        f"| {p['id']} | {p['barrio']} | {p['tipo']} | {p['m2']} | {n(p['coste'])} | {n(p['nuevos_vulnerables_300m'])} | "
-        f"{p['bajada_temp_c']} | {'; '.join(e['elemento'] for e in p['diseno']['elementos'])} |" for p in r["seleccion"])
-    restr = "\n".join(f"- {'Cumple' if x['ok'] else 'NO cumple'}: {nombre} = {n(x['valor'])} (límite {n(x['limite'])})"
-                       for nombre, x in r["restricciones"].items())
-    return f"""# Propuesta de parques bolsillo — {distrito}
-
-## Resumen
-- Mayores y niños con espacio verde (≥0,5 ha, criterio OMS) o parque bolsillo a <300 m: **{a['pct_vulnerables_300m']} % → {d['pct_vulnerables_300m']} %**
-- Parques: {d['parques']} · Inversión: {n(d['inversion'])} € · Vecinos con calles más frescas: {n(d['personas_refrescadas'])}
-
-## Justificación
-{r['explicacion']['texto']}
-
-## Cartera propuesta
-| # | Barrio | Tipo | m² | Coste (€) | Mayores y niños nuevos a <300 m | °C menos | Qué construir |
-|---|---|---|---|---|---|---|---|
-{filas}
-
-## Restricciones
-{restr}
-
-## Método
-Optimización de cobertura máxima con presupuesto (voraz + recocido simulado, validado frente al óptimo exacto por
-programación lineal entera). Diseño de cada parque: mochila exacta sobre 8 micro-intervenciones. Datos: datos.madrid.es
-(padrón 2026, vulnerabilidad, límites de barrios, parques) y OpenStreetMap (contornos de zonas verdes).
-"""
+    esc = html.escape
+    nombres = {"presupuesto": "Presupuesto (€)", "plazas_aparcamiento": "Plazas de aparcamiento eliminadas",
+               "mantenimiento_anual": "Mantenimiento anual (€)", "equidad_pct_inversion": "% inversión en barrios vulnerables"}
+    filas = "".join(
+        f"<tr><td>{p['id']}</td><td>{esc(p['barrio'])}</td><td>{esc(p['tipo'])}</td><td class='n'>{p['m2']}</td>"
+        f"<td class='n'>{n(p['coste'])}</td><td class='n'>{n(p['nuevos_vulnerables_300m'])}</td>"
+        f"<td class='n'>{p['bajada_temp_c']}</td><td>{'<br>'.join(esc(e['elemento']) for e in p['diseno']['elementos'])}</td></tr>"
+        for p in r["seleccion"])
+    restr = "".join(
+        f"<tr><td>{'✅ Cumple' if x['ok'] else '❌ No cumple'}</td><td>{nombres.get(nombre, nombre)}</td>"
+        f"<td class='n'>{n(x['valor'])}</td><td class='n'>{'≥' if nombre == 'equidad_pct_inversion' else '≤'} {n(x['limite'])}</td></tr>"
+        for nombre, x in r["restricciones"].items())
+    return f"""<!doctype html><html lang="es"><head><meta charset="utf-8">
+<title>Propuesta de parques bolsillo — {esc(distrito)}</title>
+<style>
+  body {{ font-family: Georgia, 'Times New Roman', serif; color: #1a1a1a; max-width: 900px; margin: 40px auto; padding: 0 24px; line-height: 1.5; }}
+  header {{ border-bottom: 3px solid #1b7a3e; padding-bottom: 12px; margin-bottom: 24px; }}
+  header small {{ color: #555; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }}
+  h1 {{ font-size: 26px; margin: 6px 0 0; }} h2 {{ font-size: 18px; color: #1b7a3e; margin-top: 28px; border-bottom: 1px solid #ddd; }}
+  h3 {{ font-size: 15px; margin: 14px 0 4px; }}
+  .kpi {{ display: flex; gap: 16px; margin: 16px 0; font-family: Arial, sans-serif; }}
+  .kpi div {{ flex: 1; border: 1px solid #cfe3d6; background: #f3faf5; border-radius: 6px; padding: 12px; }}
+  .kpi b {{ display: block; font-size: 24px; color: #1b7a3e; }}
+  table {{ border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12.5px; margin-top: 8px; }}
+  th, td {{ border: 1px solid #ccc; padding: 6px 8px; vertical-align: top; text-align: left; }}
+  th {{ background: #eef5f0; }} td.n {{ text-align: right; white-space: nowrap; }}
+  .nota {{ font-family: Arial, sans-serif; font-size: 12px; color: #555; }}
+  .imprimir {{ background: #fff8e1; border: 1px solid #f0d58a; padding: 8px 12px; font-family: Arial, sans-serif; font-size: 13px; }}
+  @media print {{ .imprimir {{ display: none; }} body {{ margin: 0; }} }}
+</style></head><body>
+<p class="imprimir">Para obtener el PDF: <b>Archivo → Imprimir → Guardar como PDF</b> (Ctrl/Cmd + P).</p>
+<header><small>Junta Municipal de Distrito de {esc(distrito)} · {date.today().strftime('%d/%m/%Y')}</small>
+<h1>Propuesta de parques bolsillo — {esc(distrito)}</h1></header>
+<div class="kpi">
+  <div>Mayores y niños con verde a &lt;300 m<b>{a['pct_vulnerables_300m']} % → {d['pct_vulnerables_300m']} %</b></div>
+  <div>Parques propuestos<b>{d['parques']}</b></div>
+  <div>Inversión<b>{n(d['inversion'])} €</b></div>
+  <div>Vecinos con calles más frescas<b>{n(d['personas_refrescadas'])}</b></div>
+</div>
+<h2>Justificación</h2>
+{_md_a_html(r['explicacion']['texto'])}
+<p class="nota">Texto generado por: {esc(r['explicacion']['fuente'])}. Revisar antes de su presentación oficial.</p>
+<h2>Cartera propuesta</h2>
+<table><tr><th>#</th><th>Barrio</th><th>Tipo</th><th>m²</th><th>Coste (€)</th><th>Mayores y niños nuevos a &lt;300 m</th><th>°C menos</th><th>Qué construir</th></tr>{filas}</table>
+<h2>Restricciones</h2>
+<table><tr><th>Estado</th><th>Restricción</th><th>Valor</th><th>Límite</th></tr>{restr}</table>
+<h2>Método y fuentes</h2>
+<p class="nota">Acceso a verde según la OMS Europa (espacio verde ≥0,5 ha a menos de 300 m). Optimización de cobertura máxima
+con presupuesto (voraz + recocido simulado, validada frente al óptimo exacto por programación lineal entera). Diseño de cada
+parque: mochila exacta sobre 8 micro-intervenciones según los mayores, niños y calor de su entorno. Datos: datos.madrid.es
+(padrón 2026, ranking de vulnerabilidad, límites de barrios, parques municipales) y OpenStreetMap (contornos de zonas verdes).
+Solares candidatos, costes y temperatura: datos sintéticos calibrados (prueba de concepto).</p>
+</body></html>"""
 
 
 @st.cache_data(ttl=600, show_spinner=False)
@@ -294,8 +349,8 @@ with tabs[2]:
         st.caption(f"Fuente de la explicación: {r['explicacion']['fuente']}")
         leer_en_voz_alta(r["explicacion"]["texto"], "leer_cartera")
 
-        st.download_button("📄 Descargar informe para el pleno", informe_md(r, distrito),
-                           file_name=f"informe_parques_bolsillo_{distrito}.md", mime="text/markdown")
+        st.download_button("📄 Descargar informe para el pleno (HTML imprimible a PDF)", informe_html(r, distrito),
+                           file_name=f"informe_parques_bolsillo_{slug_archivo(distrito)}.html", mime="text/html")
         if st.toggle("📈 Ver escenarios de presupuesto (rendimientos decrecientes)"):
             with st.spinner("Optimizando 7 presupuestos…"):
                 esc = escenarios(distrito)
