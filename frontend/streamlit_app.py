@@ -122,9 +122,15 @@ with tabs[1]:
     celdas["color"] = rel.map(color_deficit)
     celdas["size"] = 10 + 45 * rel  # más déficit = punto más grande
     st.subheader("Mapa de déficit verde (cuadrícula de 100 m)")
-    st.map(celdas, latitude="lat", longitude="lon", color="color", size="size")
+    anillo = pd.DataFrame(diag["anillo"]).assign(color="#9e9e9e55", size=20)
+    existentes = pd.DataFrame(diag["parques_existentes"])
+    capa_parques = existentes.rename(columns={"radio_m": "size"}).assign(color="#1b9e3e90")
+    st.map(pd.concat([anillo, celdas[["lat", "lon", "color", "size"]], capa_parques[["lat", "lon", "color", "size"]]]),
+           latitude="lat", longitude="lon", color="color", size="size")
     barrios = pd.DataFrame(diag["barrios"])
     st.caption(f"Descripción del mapa: naranja y punto grande = mayor déficit; azul y punto pequeño = menor déficit (lejos de zonas verdes, más calor y más vulnerabilidad). "
+               f"Puntos grises: franja de 300 m en distritos vecinos; círculos verdes: parques existentes, también los de "
+               f"otros distritos, porque para un vecino cuenta la distancia real y no el límite administrativo. "
                f"El barrio con más déficit es {barrios.iloc[0]['barrio']}; el {100 - k['pct_poblacion_300m']:.0f} % de "
                "los vecinos no tiene un espacio verde a menos de 300 m.")
     st.dataframe(barrios.rename(columns={"pct_sin_verde_300m": "% sin verde a 300 m",
@@ -173,7 +179,8 @@ with tabs[2]:
 
         sel = pd.DataFrame(r["seleccion"])
         st.subheader("Cartera propuesta")
-        base = celdas[["lat", "lon"]].assign(color="#9e9e9e40", size=30)
+        base = pd.concat([celdas[["lat", "lon"]].assign(color="#9e9e9e40", size=30),
+                          anillo[["lat", "lon"]].assign(color="#9e9e9e20", size=20)])
         parques = sel[["lat", "lon"]].assign(color="#1b9e3ef0", size=300)  # radio de 300 m
         st.map(pd.concat([base, parques]), latitude="lat", longitude="lon", color="color", size="size")
         st.caption(f"Descripción del mapa: los {len(sel)} círculos verdes son los parques propuestos con su radio de "
@@ -263,6 +270,12 @@ y portales de datos abiertos (Barcelona, Valencia…). **IoT** (sensores de temp
 y reentrenar el modelo: el ciclo de decisión se cierra con datos.
 
 ### Limitaciones (honestidad)
-La temperatura y los solares son sintéticos: el Random Forest se recalibraría con temperatura satelital real.
+- **Reales**: verde por distrito, padrón por barrio, vulnerabilidad por barrio y **límites oficiales de los barrios**.
+- **Verde a escala de barrio**: el Ayuntamiento publica la superficie verde por distrito, así que en el ranking de los
+  131 barrios cada barrio hereda el m²/hab de su distrito. El inventario de zonas verdes trae direcciones, no coordenadas:
+  geocodificarlo es el siguiente paso.
+- **Parques existentes**: posiciones aproximadas de los principales parques (incluidos los de distritos vecinos a <300 m).
+- **Sintéticos**: reparto de la población dentro de cada barrio, edades por celda, temperatura y solares candidatos.
+  El Random Forest se recalibraría con temperatura satelital real (Landsat/Sentinel) y sensores IoT.
 La versión en inglés cubre títulos, pestañas y explicaciones; el resto del contenido está en español.
 """)

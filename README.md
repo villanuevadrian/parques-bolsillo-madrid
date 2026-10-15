@@ -40,6 +40,8 @@ flowchart LR
 | [Población por distrito y barrio, 1-ene-2026](https://datos.madrid.es/dataset/300557-0-poblacion-distrito-barrio) | Real | m²/hab y población de cada barrio de Tetuán |
 | [Ranking de vulnerabilidad 2020](https://datos.madrid.es/dataset/300301-0-ranking-vulnerabilidad) | Real | Prioridad por equidad |
 | Ranking de prioridad de los 131 barrios | Real (cálculo propio) | 60 % vulnerabilidad del barrio + 40 % déficit verde del distrito |
+| [Límites oficiales de barrios](https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas) (TopoJSON) | Real | Silueta de Tetuán, barrio de cada celda y anillo de 300 m |
+| Parques existentes (incluidos los de distritos vecinos a <300 m) | Posición aproximada | Distancia real al verde, sin fronteras administrativas |
 | Cuadrícula de 100 m de Tetuán, temperatura, solares candidatos | Sintético calibrado | Optimización (la población suma el padrón real) |
 
 ## Métricas
@@ -57,6 +59,11 @@ enfrían; fallback del LLM sin API key; detalle en lectura fácil; validación d
 
 ## Detección a tres escalas
 Distrito para priorizar → **barrio para detectar el déficit** (131 barrios reales) → manzana de 100 m para decidir dónde intervenir.
+
+## Limitaciones
+- El verde solo se publica por distrito: en el ranking de barrios cada barrio hereda el m²/hab de su distrito.
+- El inventario de zonas verdes no tiene coordenadas (habría que geocodificarlo); los parques existentes tienen posición aproximada.
+- Temperatura, reparto de población dentro del barrio y solares candidatos son sintéticos.
 
 ## Accesibilidad
 Lectura fácil, texto grande, alto contraste, modo oscuro, español/inglés, lectura en voz alta y descripción textual de mapas y gráficos.

@@ -43,7 +43,8 @@ def barrios(n: int = 131):
 @app.get("/diagnostico")
 def diagnostico():
     return {"celdas": modelo.diagnostico(), "barrios": modelo.resumen_barrios(),
-            "kpis": modelo.kpis([]), "importancias": modelo.importancias()}
+            "kpis": modelo.kpis([]), "importancias": modelo.importancias(),
+            "anillo": modelo.anillo.to_dict("records"), "parques_existentes": modelo.parques.to_dict("records")}
 
 
 @app.post("/optimizar")

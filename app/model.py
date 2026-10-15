@@ -26,6 +26,8 @@ class Modelo:
     def __init__(self):
         self.distritos = pd.read_csv(DATA / "distritos.csv")
         self.barrios = pd.read_csv(DATA / "barrios.csv")  # ranking real de los 131 barrios
+        self.anillo = pd.read_csv(DATA / "anillo.csv")  # 300 m alrededor de Tetuán (otros distritos)
+        self.parques = pd.read_csv(DATA / "parques_existentes.csv")
         c = pd.read_csv(DATA / "celdas.csv")
         c["densidad"] = c["poblacion"] / c["poblacion"].max()
         c["vulnerables"] = c["poblacion"] * (c["pct_mayores"] + c["pct_menores"])
