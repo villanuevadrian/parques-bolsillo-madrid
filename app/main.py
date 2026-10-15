@@ -76,6 +76,14 @@ def optimizar(p: Peticion):
     return r
 
 
+@app.get("/validacion")
+def validacion(distrito: str = "Tetuán", presupuesto: int = 500_000):
+    """Compara voraz y recocido con el óptimo exacto (programación lineal entera, HiGHS) y con carteras al azar."""
+    if not 50_000 <= presupuesto <= 5_000_000:
+        raise HTTPException(422, "Presupuesto fuera de rango")
+    return get_modelo(distrito).validar(presupuesto)
+
+
 @app.get("/parque/{pid}")
 def parque(pid: int, distrito: str = "Tetuán", estilo: Literal["pleno", "facil"] = "pleno",
            idioma: Literal["es", "en"] = "es"):

@@ -154,3 +154,14 @@ def test_auditoria_cobertura_recalculada_a_mano(resultado):
     pct = 100 * c["vulnerables"][cub].sum() / c["vulnerables"].sum()
     assert abs(pct - resultado["kpis_despues"]["pct_vulnerables_300m"]) < 0.2
     assert sum(p["coste"] for p in resultado["seleccion"]) == resultado["kpis_despues"]["inversion"]
+
+
+
+@pytest.mark.parametrize("distrito,presupuesto", [("Tetuán", 500_000), ("Puente de Vallecas", 250_000)])
+def test_validacion_contra_optimo_exacto(client, distrito, presupuesto):
+    v = client.get("/validacion", params={"distrito": distrito, "presupuesto": presupuesto}).json()
+    assert "Optimal" in v["estado_solver"]
+    assert v["recocido"] <= v["optimo_exacto"] + 1          # ninguna heurística supera al óptimo exacto
+    assert v["recocido_pct_optimo"] >= 95                    # el recocido queda a <5 % del óptimo
+    assert v["recocido"] >= v["voraz"]
+    assert v["veces_mejor_que_azar"] > 1.5

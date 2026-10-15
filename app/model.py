@@ -182,6 +182,59 @@ class Modelo:
                             "mejora_pct": round(float(100 * (fs - fg) / fg), 1) if fg > 0 else 0.0},
         }
 
+    # ---------- Validación frente al óptimo exacto ----------
+    def validar(self, presupuesto: int, n_azar: int = 1000) -> dict:
+        """Cobertura pura (mayores y niños nuevos a <300 m) con presupuesto: óptimo exacto por programación lineal
+        entera (HiGHS) frente a voraz, recocido simulado y carteras aleatorias del mismo presupuesto."""
+        from scipy.optimize import Bounds, LinearConstraint, milp
+        from scipy.sparse import lil_matrix
+
+        sin = np.where(self._sin_cobertura())[0]          # celdas que hoy no tienen verde OMS a <300 m
+        pos = {j: k for k, j in enumerate(sin)}
+        ids = list(self.cand.index)
+        n, m = len(ids), len(sin)
+        w = self.celdas["vulnerables"].to_numpy()[sin]
+        # Variables: x_i (construir parque i) e y_j (celda j cubierta). max Σ w_j y_j
+        c = np.concatenate([np.zeros(n), -w])
+        A = lil_matrix((m + 1, n + m))
+        for k, i in enumerate(ids):
+            for j in self.cubre[i]:
+                if j in pos:
+                    A[pos[j], k] = -1                       # y_j - Σ_{i cubre j} x_i <= 0
+        for j in range(m):
+            A[j, n + j] = 1
+        A[m, :n] = self.cand.loc[ids, "coste"].to_numpy()   # Σ coste_i x_i <= presupuesto
+        res = milp(c, constraints=LinearConstraint(A.tocsr(), -np.inf, np.r_[np.zeros(m), presupuesto]),
+                   integrality=np.r_[np.ones(n), np.zeros(m)], bounds=Bounds(0, 1))
+        optimo = float(-res.fun)
+        sel_opt = [ids[k] for k in range(n) if res.x[k] > 0.5]
+
+        pesos = {"cobertura": 1, "equidad": 0, "calor": 0}
+        lim = {"presupuesto": presupuesto, "max_plazas": 10**6, "max_mantenimiento": 10**9, "min_equidad_pct": 0}
+        g = self.voraz(pesos, lim)
+        sa = self.recocido(g, pesos, lim)
+        v = lambda sel: self.evaluar(sel, pesos)["vulnerables_cubiertos"]  # noqa: E731
+        vg, vs = v(g), max(v(sa), v(g))
+
+        rnd = np.random.default_rng(0)
+        costes = self.cand["coste"]
+        azar = []
+        for _ in range(n_azar):  # carteras aleatorias: se añaden parques al azar mientras quepa en el presupuesto
+            sel, gasto = [], 0
+            for i in rnd.permutation(ids):
+                if gasto + costes[i] <= presupuesto:
+                    sel.append(i); gasto += costes[i]
+            azar.append(v(sel))
+        return {
+            "presupuesto": presupuesto, "optimo_exacto": round(optimo), "estado_solver": res.message,
+            "voraz": round(vg), "recocido": round(vs),
+            "voraz_pct_optimo": round(100 * vg / optimo, 1) if optimo else 100.0,
+            "recocido_pct_optimo": round(100 * vs / optimo, 1) if optimo else 100.0,
+            "azar_medio": round(float(np.mean(azar))), "azar_mejor": round(float(np.max(azar))),
+            "veces_mejor_que_azar": round(float(vs / max(np.mean(azar), 1)), 1),
+            "parques_optimo": len(sel_opt),
+        }
+
     # ---------- Salidas ----------
     def kpis(self, sel: list[int]) -> dict:
         c = self.celdas

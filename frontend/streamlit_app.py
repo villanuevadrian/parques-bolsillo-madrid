@@ -96,6 +96,11 @@ def detalle_parque(pid: int, distrito: str, estilo: str, idioma: str) -> dict:
 
 
 @st.cache_data(ttl=600, show_spinner=False)
+def validacion(distrito: str, presupuesto: int) -> dict:
+    return api("/validacion", params={"distrito": distrito, "presupuesto": presupuesto})
+
+
+@st.cache_data(ttl=600, show_spinner=False)
 def impacto_ejemplo(distrito: str) -> dict:
     return api("/optimizar", "post", json={"distrito": distrito, "presupuesto": 500_000})
 
@@ -245,6 +250,18 @@ with tabs[2]:
         st.info(r["explicacion"]["texto"])
         st.caption(f"Fuente de la explicación: {r['explicacion']['fuente']}")
         leer_en_voz_alta(r["explicacion"]["texto"], "leer_cartera")
+
+        with st.expander("🔬 Validación del algoritmo frente al óptimo exacto"):
+            with st.spinner("Resolviendo el óptimo exacto (programación lineal entera)…"):
+                v = validacion(distrito, presupuesto)
+            v1, v2, v3 = st.columns(3)
+            v1.metric("Recocido simulado", f"{v['recocido_pct_optimo']} % del óptimo")
+            v2.metric("Voraz", f"{v['voraz_pct_optimo']} % del óptimo")
+            v3.metric("Frente a elegir al azar", f"{v['veces_mejor_que_azar']}× mejor")
+            st.caption(f"Objetivo de cobertura pura (mayores y niños que ganan verde a <300 m) con {presupuesto:,} €. "
+                       f"Óptimo exacto: {v['optimo_exacto']:,} personas, calculado con programación lineal entera "
+                       f"(solver HiGHS: {v['estado_solver'].split('(')[-1].rstrip(')')}). Azar: media de 1.000 carteras "
+                       f"aleatorias del mismo presupuesto ({v['azar_medio']:,} personas).".replace(",", "."))
     else:
         st.caption("Ajusta presupuesto, restricciones y prioridades y pulsa el botón.")
 
@@ -330,6 +347,7 @@ y reentrenar el modelo: el ciclo de decisión se cierra con datos.
 | **Índice de déficit de celda** | 0,45 × lejanía (dist/600 m) + 0,30 × calor (normalizado) + 0,25 × vulnerabilidad | Pondera la proximidad (criterio OMS) por encima del calor y la equidad. Pesos: hipótesis editable |
 | **Bajada de temperatura** | Random Forest (verde, asfalto, densidad → °C) predice antes/después de añadir el parque en las celdas a ≤150 m | Modelo sustituto; error medio ±0,5 °C en validación. Datos de temperatura sintéticos → se recalibra con satélite |
 | **Optimización** | max Σ pesos × (vulnerables nuevos a 300 m + equidad + personas refrescadas) sujeto a presupuesto ≤ B; las demás restricciones penalizan un 30 % cada una | Problema de cobertura máxima con presupuesto (NP-difícil): voraz por beneficio/coste + recocido simulado (1.500 iteraciones) |
+| **Validación** | óptimo exacto por programación lineal entera (HiGHS): max Σ w·y, y_j ≤ Σ x_i que cubren j, Σ coste·x ≤ presupuesto | El recocido alcanza el 98,8–100 % del óptimo en los distritos probados; 2,7–9× mejor que carteras al azar |
 | **Coste por vecino** | coste del parque ÷ vecinos que ganan verde a 300 m | Costes de urbanización 150–320 €/m² y mantenimiento 3–6 €/m²·año: hipótesis de orden de magnitud |
 
 ### Limitaciones (honestidad)
