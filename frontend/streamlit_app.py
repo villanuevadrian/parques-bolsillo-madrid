@@ -1,6 +1,6 @@
 """Interfaz. Arranque: streamlit run frontend/streamlit_app.py   (con la API ya levantada)
 Accesibilidad: lectura fácil, texto grande, alto contraste, ES/EN, lectura en voz alta,
-descripción textual de cada gráfico. Modo oscuro: menú ⋮ > Settings > Theme.
+descripción textual de cada gráfico y mapa. Modo oscuro: menú ⋮ > Settings > Theme.
 """
 import json
 import os
@@ -11,13 +11,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 API = os.getenv("API_URL", "http://localhost:8000")
-st.set_page_config(page_title="Aire Madrid", page_icon="🌿", layout="wide")
+st.set_page_config(page_title="Parques bolsillo Tetuán", page_icon="🌳", layout="wide")
 
 # ---------- Accesibilidad ----------
 with st.sidebar:
     st.header("♿ Accesibilidad")
     idioma = st.radio("Idioma / Language", ["es", "en"], horizontal=True)
-    facil = st.toggle("Lectura fácil (personas mayores)")
+    facil = st.toggle("Lectura fácil (vecinos y personas mayores)")
     grande = st.toggle("Texto grande")
     contraste = st.toggle("Alto contraste")
     st.caption("Modo oscuro: menú ⋮ arriba a la derecha → Settings → Theme.")
@@ -31,102 +31,203 @@ if css:
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 T = {  # textos ES/EN
-    "es": {"titulo": "🌿 Aire Madrid: predicción y alertas de calidad del aire",
-           "tab": ["Predicción", "Panel ciudad", "Anomalías", "Sobre el proyecto"], "boton": "Predecir",
-           "leer": "🔊 Leer en voz alta"},
-    "en": {"titulo": "🌿 Madrid Air: air quality forecasting and alerts",
-           "tab": ["Forecast", "City dashboard", "Anomalies", "About"], "boton": "Forecast",
-           "leer": "🔊 Read aloud"},
+    "es": {"titulo": "🌳 Parques bolsillo: dónde invertir cada euro para acercar el verde a quien más lo necesita",
+           "tab": ["Ciudad (datos reales)", "Diagnóstico Tetuán", "Optimizador", "Detalle del parque", "Sobre el proyecto"],
+           "boton": "Calcular la mejor cartera de parques", "leer": "🔊 Leer en voz alta"},
+    "en": {"titulo": "🌳 Pocket parks: where to invest every euro to bring green space to those who need it most",
+           "tab": ["City (real data)", "Tetuán diagnosis", "Optimizer", "Park detail", "About"],
+           "boton": "Find the best park portfolio", "leer": "🔊 Read aloud"},
 }[idioma]
+ESTILO = "facil" if facil else "pleno"
 
 
-def leer_en_voz_alta(texto: str):
+def leer_en_voz_alta(texto: str, clave: str):
     """Text-to-speech nativo del navegador (Web Speech API): gratis y sin red."""
     lang = "es-ES" if idioma == "es" else "en-GB"
     components.html(f"""
-      <button style="font-size:1rem;padding:6px 12px;cursor:pointer" aria-label="{T['leer']}"
+      <button id="{clave}" style="font-size:1rem;padding:6px 12px;cursor:pointer" aria-label="{T['leer']}"
         onclick='const u=new SpeechSynthesisUtterance({json.dumps(texto)});u.lang="{lang}";
                  speechSynthesis.cancel();speechSynthesis.speak(u);'>{T['leer']}</button>""", height=50)
 
 
-def api_get(path):
+def api(path, metodo="get", **kw):
     try:
-        return httpx.get(f"{API}{path}", timeout=10).json()
-    except httpx.HTTPError:
-        st.error(f"No conecto con la API en {API}. ¿Está arrancada? (uvicorn app.main:app)")
+        r = getattr(httpx, metodo)(f"{API}{path}", timeout=60, **kw)
+        r.raise_for_status()
+        return r.json()
+    except httpx.HTTPError as e:
+        st.error(f"No conecto con la API en {API} ({type(e).__name__}). ¿Está arrancada? (uvicorn app.main:app)")
         st.stop()
 
 
-st.title(T["titulo"])
-health = api_get("/health")
-tab1, tab2, tab3, tab4 = st.tabs(T["tab"])
+def rojo_verde(v: float) -> str:
+    """0 -> verde, 1 -> rojo (hex con transparencia) para el mapa."""
+    v = max(0.0, min(1.0, v))
+    return f"#{int(255 * v):02x}{int(200 * (1 - v)):02x}40c0"
 
-# ---------- 1. Predicción ----------
-with tab1:
+
+st.title(T["titulo"])
+health = api("/health")
+diag = api("/diagnostico")
+tabs = st.tabs(T["tab"])
+
+# ---------- 1. Ciudad: datos abiertos reales ----------
+with tabs[0]:
+    ciudad = pd.DataFrame(api("/ciudad"))
+    st.subheader("m² de zonas verdes por habitante en los 21 distritos")
+    st.bar_chart(ciudad.set_index("distrito")["m2_hab"], horizontal=True)
+    peor = ciudad.loc[ciudad["m2_hab"].idxmin()]
+    tetuan = ciudad[ciudad["distrito"] == "Tetuán"].iloc[0]
+    st.caption(f"Descripción del gráfico: {peor['distrito']} tiene la menor superficie verde por habitante "
+               f"({peor['m2_hab']} m²). Tetuán tiene {tetuan['m2_hab']} m² por habitante.")
+    st.info(f"**Por qué Tetuán:** combina poco verde ({tetuan['m2_hab']} m²/hab) con alta vulnerabilidad "
+            f"(puesto {int(tetuan['ranking_vulnerabilidad'])} de 21 en el ranking municipal). Los distritos del centro "
+            "tienen menos verde, pero son menos vulnerables: los m²/habitante por sí solos no bastan.")
+    st.caption("Fuente: datos.madrid.es — Superficie de zonas verdes por distrito (2025), Población por distrito "
+               "y barrio (1-ene-2026), Ranking de vulnerabilidad (2020). No incluye parques históricos como el Retiro.")
+    with st.expander("Ver tabla de datos"):
+        st.dataframe(ciudad, hide_index=True)
+
+# ---------- 2. Diagnóstico Tetuán ----------
+with tabs[1]:
+    k = diag["kpis"]
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Mayores y niños con verde a <300 m", f"{k['pct_vulnerables_300m']} %")
+    c2.metric("Población con verde a <300 m", f"{k['pct_poblacion_300m']} %")
+    c3.metric("m² verde por habitante", k["m2_verde_hab"], help="Referencia habitual (OMS): mínimo 9 m²/hab")
+    celdas = pd.DataFrame(diag["celdas"])
+    celdas["color"] = celdas["indice_deficit"].map(rojo_verde)
+    st.subheader("Mapa de déficit verde (cuadrícula de 100 m)")
+    st.map(celdas, latitude="lat", longitude="lon", color="color", size=45)
+    barrios = pd.DataFrame(diag["barrios"])
+    st.caption(f"Descripción del mapa: rojo = mayor déficit (lejos de zonas verdes, más calor y más vulnerabilidad). "
+               f"El barrio con más déficit es {barrios.iloc[0]['barrio']}; el {100 - k['pct_poblacion_300m']:.0f} % de "
+               "los vecinos no tiene un espacio verde a menos de 300 m.")
+    st.dataframe(barrios.rename(columns={"pct_sin_verde_300m": "% sin verde a 300 m",
+                                         "temp_media": "temp. verano (°C)", "deficit_medio": "índice déficit"}),
+                 hide_index=True)
+
+# ---------- 3. Optimizador ----------
+with tabs[2]:
     c1, c2 = st.columns(2)
     with c1:
-        distrito = st.selectbox("Distrito", health["distritos"])
-        hora = st.slider("Hora", 0, 23, 9)
-        dia = st.selectbox("Día", range(7), format_func=lambda i: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"][i])
+        st.markdown("**Presupuesto y restricciones**")
+        presupuesto = st.slider("Presupuesto (€)", 100_000, 2_000_000, 500_000, step=50_000)
+        max_plazas = st.slider("Máx. plazas de aparcamiento eliminadas", 0, 50, 10)
+        max_mant = st.slider("Máx. mantenimiento anual (€)", 5_000, 100_000, 20_000, step=1_000)
+        min_eq = st.slider("Mín. % de inversión en barrios vulnerables", 0, 100, 60)
     with c2:
-        trafico = st.slider("Intensidad de tráfico (0-1)", 0.0, 1.2, 0.7)
-        temp = st.slider("Temperatura (°C)", -5.0, 45.0, 25.0)
-        viento = st.slider("Viento (km/h)", 0.0, 30.0, 4.0)
+        st.markdown("**Prioridades del técnico**")
+        p_cob = st.slider("Cobertura: mayores y niños a <300 m", 0.0, 3.0, 1.0, 0.5)
+        p_eq = st.slider("Equidad: barrios más vulnerables", 0.0, 3.0, 1.0, 0.5)
+        p_cal = st.slider("Calor: bajar la temperatura en verano", 0.0, 3.0, 1.0, 0.5)
 
     if st.button(T["boton"], type="primary"):
-        r = httpx.post(f"{API}/predict", timeout=30, json={
-            "distrito": distrito, "hora": hora, "dia_semana": dia, "trafico": trafico,
-            "temperatura": temp, "viento": viento, "estilo": "facil" if facil else "normal", "idioma": idioma,
-        }).json()
-        color = {"bueno": "🟢", "moderado": "🟡", "alto": "🔴"}[r["nivel"]]
-        st.metric("NO₂ (µg/m³)", r["no2_predicho"], help=f"Error medio del modelo: ±{r['error_medio_modelo']}")
-        st.subheader(f"{color} {r['nivel'].upper()}")  # icono + texto: no depende solo del color
+        with st.spinner("Optimizando (voraz + recocido simulado)…"):
+            st.session_state["res"] = api("/optimizar", "post", json={
+                "presupuesto": presupuesto, "max_plazas": max_plazas, "max_mantenimiento": max_mant,
+                "min_equidad_pct": min_eq, "peso_cobertura": p_cob, "peso_equidad": p_eq, "peso_calor": p_cal,
+                "estilo": ESTILO, "idioma": idioma})
+
+    r = st.session_state.get("res")
+    if r:
+        a, d = r["kpis_antes"], r["kpis_despues"]
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Mayores y niños con verde a <300 m", f"{d['pct_vulnerables_300m']} %",
+                  f"{d['pct_vulnerables_300m'] - a['pct_vulnerables_300m']:+.1f} pp")
+        m2.metric("Parques", d["parques"])
+        m3.metric("Inversión", f"{d['inversion']:,} €".replace(",", "."))
+        m4.metric("Vecinos con calles más frescas", f"{d['personas_refrescadas']:,}".replace(",", "."))
+
+        st.markdown("**Restricciones** (icono + texto, no solo color)")
+        nombres = {"presupuesto": "Presupuesto", "plazas_aparcamiento": "Plazas de aparcamiento",
+                   "mantenimiento_anual": "Mantenimiento anual", "equidad_pct_inversion": "% inversión en barrios vulnerables"}
+        for n, x in r["restricciones"].items():
+            signo = "≥" if n == "equidad_pct_inversion" else "≤"
+            st.write(f"{'✅ Cumple' if x['ok'] else '❌ No cumple'} — {nombres[n]}: "
+                     f"{x['valor']:,.0f} (límite {signo} {x['limite']:,.0f})".replace(",", "."))
+
+        sel = pd.DataFrame(r["seleccion"])
+        st.subheader("Cartera propuesta")
+        base = celdas[["lat", "lon"]].assign(color="#9e9e9e40", size=30)
+        parques = sel[["lat", "lon"]].assign(color="#1b9e3ef0", size=300)  # radio de 300 m
+        st.map(pd.concat([base, parques]), latitude="lat", longitude="lon", color="color", size="size")
+        st.caption(f"Descripción del mapa: los {len(sel)} círculos verdes son los parques propuestos con su radio de "
+                   f"300 m; están en {', '.join(sorted(sel['barrio'].unique()))}.")
+        st.dataframe(sel[["id", "barrio", "tipo", "m2", "coste", "nuevos_vulnerables_300m", "bajada_temp_c",
+                          "coste_por_vecino"]].rename(columns={
+                              "nuevos_vulnerables_300m": "mayores y niños nuevos a <300 m",
+                              "bajada_temp_c": "°C menos", "coste_por_vecino": "€ por vecino"}), hide_index=True)
+
+        cmp = r["comparativa"]
+        st.caption(f"Algoritmo: el recocido simulado obtiene un {cmp['mejora_pct']} % más de valor que la solución "
+                   f"voraz ({cmp['recocido']:,} frente a {cmp['voraz']:,}).".replace(",", "."))
         st.info(r["explicacion"]["texto"])
         st.caption(f"Fuente de la explicación: {r['explicacion']['fuente']}")
-        leer_en_voz_alta(r["explicacion"]["texto"])
+        leer_en_voz_alta(r["explicacion"]["texto"], "leer_cartera")
+    else:
+        st.caption("Ajusta presupuesto, restricciones y prioridades y pulsa el botón.")
+
+# ---------- 4. Detalle del parque ----------
+with tabs[3]:
+    r = st.session_state.get("res")
+    if not r:
+        st.write("Primero calcula una cartera en la pestaña Optimizador.")
+    else:
+        opciones = {f"#{p['id']} · {p['barrio']} · {p['tipo']}": p["id"] for p in r["seleccion"]}
+        pid = opciones[st.selectbox("Parque", list(opciones))]
+        p = api(f"/parque/{pid}", params={"estilo": ESTILO, "idioma": idioma})
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Vecinos nuevos con verde a <300 m", f"{p['nuevos_vecinos_300m']:,}".replace(",", "."))
+        c2.metric("Bajada de temperatura cercana", f"{p['bajada_temp_c']} °C",
+                  help=f"Modelo Random Forest, error medio ±{health['mae_temperatura']} °C")
+        c3.metric("Coste por vecino", f"{p['coste_por_vecino']} €")
+        st.write(f"**{p['tipo']}** · {p['m2']} m² · {p['coste']:,} € · mantenimiento {p['mantenimiento_anual']:,} €/año · "
+                 f"agua {p['agua_m3_anual']} m³/año · plazas eliminadas: {p['plazas_perdidas']}".replace(",", "."))
+        st.info(p["explicacion"]["texto"])
+        st.caption(f"Fuente de la explicación: {p['explicacion']['fuente']}")
+        leer_en_voz_alta(p["explicacion"]["texto"], "leer_parque")
         if not facil:
-            st.write("**¿Qué influye más en la predicción?** (explicabilidad)")
-            st.bar_chart(pd.Series(r["factores"]))
-            top = next(iter(r["factores"]))
-            st.caption(f"Descripción del gráfico: la variable más influyente es «{top}».")
+            st.write("**¿Qué influye más en la temperatura?** (explicabilidad del modelo)")
+            st.bar_chart(pd.Series(diag["importancias"]))
+            st.caption(f"Descripción del gráfico: la variable más influyente es «{next(iter(diag['importancias']))}».")
 
-# ---------- 2. Panel ----------
-with tab2:
-    s = api_get("/stats")
-    dfd = pd.DataFrame(s["distritos"]).set_index("distrito")
-    st.subheader("NO₂ medio por distrito")
-    st.bar_chart(dfd["no2_medio"])
-    peor = dfd["no2_medio"].idxmax()
-    st.caption(f"Descripción del gráfico: {peor} es el distrito con peor calidad media ({dfd.loc[peor, 'no2_medio']} µg/m³).")
-    st.subheader("Perfil horario")
-    st.line_chart(pd.DataFrame(s["perfil_horario"]).set_index("hora"))
-    st.caption("Descripción del gráfico: picos en horas punta de mañana y tarde, coincidiendo con el tráfico.")
-
-# ---------- 3. Anomalías ----------
-with tab3:
-    st.write("Lecturas atípicas detectadas automáticamente (IsolationForest): posibles obras, incidentes o sensores averiados.")
-    st.dataframe(pd.DataFrame(api_get("/anomalies")), use_container_width=True)
-
-# ---------- 4. Sobre el proyecto (se vende sola) ----------
-with tab4:
+# ---------- 5. Sobre el proyecto ----------
+with tabs[4]:
     st.markdown(f"""
 ### Problema
-La contaminación por NO₂ en Madrid se concentra en horas y zonas concretas, pero el ciudadano no sabe **cuándo** ni **dónde** evitarla.
+Madrid quiere acercar el verde a sus vecinos, pero el presupuesto es limitado. Los m² de verde por habitante engañan:
+el centro tiene menos verde, pero los barrios **vulnerables** sufren más el **calor** y tienen a mayores y niños **lejos** de un parque.
+
+### Usuario
+**Técnico municipal** (Junta de Distrito / Medio Ambiente) que debe decidir y **justificar ante el pleno** dónde invertir.
+Los vecinos reciben la misma propuesta en **lectura fácil**.
 
 ### Solución
-Plataforma que **predice** la calidad del aire por distrito y hora, **detecta anomalías** y lo **explica en lenguaje natural** adaptado a cada persona.
+Motor de decisión que **detecta** el déficit (proximidad + calor + vulnerabilidad) y **optimiza** dónde construir parques bolsillo:
+- **Optimización con restricciones**: cobertura máxima con presupuesto; voraz + **recocido simulado** (metaheurística).
+- **ML**: Random Forest como modelo sustituto de la temperatura (error ±{health['mae_temperatura']} °C) → °C que baja cada parque.
+- **IA generativa**: informe para el pleno y ficha en lectura fácil, con *fallback*: el servicio nunca se cae.
 
-### Tecnología
-- **ML ligero y explicable**: Random Forest (error medio ±{health['mae']} µg/m³) + Isolation Forest para anomalías. Entrena en segundos en CPU.
-- **IA generativa** para explicar resultados, con *fallback* determinista: el servicio nunca se cae.
-- **Arquitectura API-first** (FastAPI): la misma API sirve web, app móvil, paneles municipales o chatbots.
+### Métricas
+- **De éxito**: % de mayores y niños con verde a <300 m (criterio OMS Europa), m²/habitante, °C de reducción, coste por vecino.
+- **De restricción**: presupuesto, plazas de aparcamiento, mantenimiento anual, % de inversión en barrios vulnerables.
+
+### Datos
+**Reales** (datos.madrid.es): zonas verdes por distrito, padrón por barrio 2026, ranking de vulnerabilidad.
+**Sintéticos calibrados**: cuadrícula de Tetuán (la población suma el padrón real de cada barrio), temperatura y solares candidatos.
+Siguiente paso: inventario de zonas verdes georreferenciado, temperatura satelital (Copernicus) y suelo municipal disponible.
 
 ### Inclusión
-Lectura fácil para personas mayores, texto grande, alto contraste, modo oscuro, bilingüe, lectura en voz alta y descripción textual de los gráficos. Los niveles se indican con icono **y** texto, no solo con color.
+Prioriza a mayores, niños y barrios vulnerables. Lectura fácil, texto grande, alto contraste, modo oscuro, bilingüe,
+voz y descripción textual de mapas y gráficos. Las restricciones se muestran con icono **y** texto.
 
 ### Sostenibilidad
-Modelos de bajo consumo (sin GPU). Objetivo: reducir exposición a contaminación y fomentar movilidad sostenible (ODS 3, 11 y 13).
+Menos islas de calor, especies de bajo consumo de agua (m³/año por parque), coste de mantenimiento como restricción.
+Modelos ligeros en CPU. ODS 3, 10, 11 y 13.
 
-### Escalabilidad
-Hoy: datos sintéticos. Mañana: conectado al portal de **datos abiertos del Ayuntamiento** (estaciones de calidad del aire, aforos de tráfico, AEMET). Se replica en cualquier ciudad cambiando la fuente de datos. Contenedorizable con Docker.
+### Modelo de negocio y escalabilidad
+**SaaS B2G** para ayuntamientos: suscripción anual por municipio. Arquitectura API-first: se replica en cualquier ciudad
+cambiando la fuente de datos. **IoT** (sensores de temperatura y afluencia) para medir el impacto real tras construir
+y reentrenar el modelo: el ciclo de decisión se cierra con datos.
 """)
