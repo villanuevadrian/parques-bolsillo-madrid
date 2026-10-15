@@ -34,12 +34,17 @@ class Modelo:
         self.distritos = pd.read_csv(DATA / "distritos.csv")
         self.barrios = pd.read_csv(DATA / "barrios.csv")  # ranking real de los 131 barrios
         self.anillo = pd.read_csv(carpeta / "anillo.csv").fillna({"barrio": "fuera del municipio"})  # 300 m alrededor del distrito (otros distritos)
-        self.parques = pd.read_csv(DATA / "parques_existentes.csv")  # 203 parques oficiales
+        verde = pd.concat([pd.read_csv(DATA / "verde_osm.csv").assign(fuente="OpenStreetMap"),
+                           pd.read_csv(DATA / "parques_existentes.csv").assign(fuente="Ayuntamiento", bolsillo=False)])
         c = pd.read_csv(carpeta / "celdas.csv")
         c["densidad"] = c["poblacion"] / c["poblacion"].max()
         c["vulnerables"] = c["poblacion"] * (c["pct_mayores"] + c["pct_menores"])
         self.celdas = c
         self.cand = pd.read_csv(carpeta / "candidatos.csv").set_index("id", drop=False)
+        zona = pd.concat([c[["lat", "lon"]], self.anillo[["lat", "lon"]]])
+        self.parques = verde[verde["lat"].between(zona["lat"].min(), zona["lat"].max())
+                             & verde["lon"].between(zona["lon"].min(), zona["lon"].max())][
+            ["nombre", "lat", "lon", "radio_m", "bolsillo", "fuente"]]  # verde existente alrededor del distrito
 
         X, y = c[FEATURES], c["temp_verano"]
         Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0)

@@ -98,7 +98,7 @@ def test_explicacion_en_ingles(client):
 def test_limites_reales_y_anillo_300m(client):
     d = client.get("/diagnostico").json()
     assert len(d["anillo"]) > 0  # franja de 300 m en distritos vecinos
-    assert len(d["parques_existentes"]) == 203  # parques oficiales de toda la ciudad, sin fronteras
+    assert any(p["bolsillo"] for p in d["parques_existentes"])  # parques bolsillo reales de OpenStreetMap
     assert set(modelo.celdas["barrio"]) == {"Almenara", "Bellas Vistas", "Berruguete", "Castillejos",
                                              "Cuatro Caminos", "Valdeacederas"}
 
@@ -113,3 +113,9 @@ def test_otro_distrito_funciona(client):
 @pytest.mark.parametrize("distrito", ["Usera", "Fuencarral-El Pardo", "Centro"])
 def test_diagnostico_todos_los_tipos_de_distrito(client, distrito):
     assert client.get("/diagnostico", params={"distrito": distrito}).status_code == 200
+
+
+def test_verde_por_barrio_osm(client):
+    b = client.get("/barrios").json()
+    assert all("m2_hab_barrio" in x and "parques_bolsillo" in x for x in b)
+    assert sum(x["parques_bolsillo"] for x in b) > 1000  # Madrid tiene miles de zonas verdes pequeñas

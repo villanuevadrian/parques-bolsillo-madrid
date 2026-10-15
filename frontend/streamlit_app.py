@@ -112,11 +112,13 @@ with tabs[0]:
     top = pd.DataFrame(api("/barrios", params={"n": 15}))
     st.bar_chart(top.set_index("barrio")["prioridad"], horizontal=True)
     st.caption(f"Descripción del gráfico: {top.iloc[0]['barrio']} ({top.iloc[0]['distrito']}) es el barrio con más "
-               "prioridad. Prioridad = 60 % vulnerabilidad del barrio + 40 % déficit verde de su distrito. "
+               "prioridad. Prioridad = 60 % vulnerabilidad del barrio + 40 % déficit de verde del propio barrio "
+               "(superficie real de OpenStreetMap). "
                f"El primero de Tetuán es {top[top['distrito'] == 'Tetuán'].iloc[0]['barrio'] if (top['distrito'] == 'Tetuán').any() else '—'}.")
-    st.dataframe(top[["puesto", "barrio", "distrito", "poblacion", "ranking_vulnerabilidad", "m2_hab_distrito",
+    st.dataframe(top[["puesto", "barrio", "distrito", "poblacion", "ranking_vulnerabilidad", "m2_hab_barrio", "parques_bolsillo",
                       "prioridad"]].rename(columns={"ranking_vulnerabilidad": "puesto vulnerabilidad (de 131)",
-                                                    "m2_hab_distrito": "m² verde/hab del distrito"}), hide_index=True)
+                                                    "m2_hab_barrio": "m² verde/hab del barrio",
+                                                    "parques_bolsillo": "parques bolsillo existentes"}), hide_index=True)
     st.caption("Escala: distrito para priorizar → barrio para detectar → manzana de 100 m para decidir dónde intervenir "
                "(pestañas siguientes, en el distrito elegido arriba).")
 
@@ -135,16 +137,15 @@ with tabs[1]:
     st.subheader("Mapa de déficit verde (cuadrícula de 100 m)")
     anillo = pd.DataFrame(diag["anillo"]).assign(color="#9e9e9e55", size=20)
     existentes = pd.DataFrame(diag["parques_existentes"])
-    zona = pd.concat([celdas[["lat", "lon"]], anillo[["lat", "lon"]]])
-    existentes = existentes[existentes["lat"].between(zona["lat"].min(), zona["lat"].max())
-                            & existentes["lon"].between(zona["lon"].min(), zona["lon"].max())]  # solo los cercanos
-    capa_parques = existentes.rename(columns={"radio_m": "size"}).assign(color="#1b9e3e90")
+    existentes["radio_m"] = existentes["radio_m"].clip(lower=25)  # que los más pequeños se vean
+    existentes["color"] = existentes["bolsillo"].map({True: "#a6dba0c0", False: "#1b9e3e90"})
+    capa_parques = existentes.rename(columns={"radio_m": "size"})
     st.map(pd.concat([anillo, celdas[["lat", "lon", "color", "size"]], capa_parques[["lat", "lon", "color", "size"]]]),
            latitude="lat", longitude="lon", color="color", size="size")
     barrios = pd.DataFrame(diag["barrios"])
     st.caption(f"Descripción del mapa: naranja y punto grande = mayor déficit; azul y punto pequeño = menor déficit (lejos de zonas verdes, más calor y más vulnerabilidad). "
-               f"Puntos grises: franja de 300 m en distritos vecinos; círculos verdes: parques existentes, también los de "
-               f"otros distritos, porque para un vecino cuenta la distancia real y no el límite administrativo. "
+               f"Puntos grises: franja de 300 m en distritos vecinos; círculos verde oscuro: espacios verdes de 0,5 ha o más (criterio OMS); verde claro: parques "
+               f"bolsillo existentes (<0,5 ha). Cuentan también los de otros distritos, porque para un vecino cuenta la distancia real y no el límite administrativo. "
                f"El barrio con más déficit es {barrios.iloc[0]['barrio']}; el {100 - k['pct_poblacion_300m']:.0f} % de "
                "los vecinos no tiene un espacio verde a menos de 300 m.")
     st.dataframe(barrios.rename(columns={"pct_sin_verde_300m": "% sin verde a 300 m",
@@ -265,12 +266,14 @@ Motor de decisión que **detecta** el déficit (proximidad + calor + vulnerabili
 - **IA generativa**: informe para el pleno y ficha en lectura fácil, con *fallback*: el servicio nunca se cae.
 
 ### Métricas
-- **De éxito**: % de mayores y niños con verde a <300 m (criterio OMS Europa), m²/habitante, °C de reducción, coste por vecino.
+- **De éxito**: % de mayores y niños con un espacio verde de ≥0,5 ha a <300 m (criterio OMS Europa) o con un parque
+  bolsillo nuevo (la micro-intervención para quien no lo tiene), m²/habitante, °C de reducción, coste por vecino.
 - **De restricción**: presupuesto, plazas de aparcamiento, mantenimiento anual, % de inversión en barrios vulnerables.
 
 ### Datos
 **Reales** (datos.madrid.es): zonas verdes por distrito, padrón por barrio 2026, ranking de vulnerabilidad.
-**Reales también**: límites oficiales de los 131 barrios y 203 parques y jardines municipales con coordenadas.
+**Reales también**: límites oficiales de los 131 barrios, 203 parques municipales con coordenadas y **3.668 zonas
+verdes de OpenStreetMap con su contorno** (2.202 de tamaño parque bolsillo, <5.000 m²) → verde real por barrio.
 **Sintéticos calibrados**: cuadrícula de 100 m de cada distrito (la población suma el padrón real de cada barrio), temperatura y solares candidatos.
 Siguiente paso: inventario de zonas verdes georreferenciado, temperatura satelital (Copernicus) y suelo municipal disponible.
 
@@ -288,14 +291,25 @@ cambiando la fuente de datos: Copernicus Urban Atlas (verde), temperatura de sup
 y portales de datos abiertos (Barcelona, Valencia…). **IoT** (sensores de temperatura y afluencia) para medir el impacto real tras construir
 y reentrenar el modelo: el ciclo de decisión se cierra con datos.
 
+### Metodología y cálculos (cómo se obtiene cada número)
+| Cálculo | Fórmula | Justificación / fuente |
+|---|---|---|
+| **Acceso a verde (KPI principal)** | % de mayores (≥65) y niños (<12) cuya celda está a ≤300 m en línea recta de un espacio verde de ≥0,5 ha | Indicador de la **OMS Europa** (*Urban green spaces: a brief for action*, 2017): verde de 0,5–1 ha a 300 m |
+| **Distancia al verde** | distancia del centro de la celda al centro de la zona verde − su radio equivalente (√(superficie/π)) | Superficie real de OpenStreetMap; parques municipales sin superficie: radio 150 m (parque) / 50 m (jardín) |
+| **Verde por habitante** | m² de verde ÷ padrón | Distrito: dato oficial del Ayuntamiento. Barrio: suma de zonas OSM dentro del límite oficial del barrio |
+| **Prioridad de barrio** | 0,6 × vulnerabilidad + 0,4 × déficit verde (1 − min(m²/hab, 15)/15) | Vulnerabilidad: ranking oficial del Ayuntamiento. 15 m²/hab: rango alto de las recomendaciones habituales (9–15). Pesos: hipótesis editable |
+| **Índice de déficit de celda** | 0,45 × lejanía (dist/600 m) + 0,30 × calor (normalizado) + 0,25 × vulnerabilidad | Pondera la proximidad (criterio OMS) por encima del calor y la equidad. Pesos: hipótesis editable |
+| **Bajada de temperatura** | Random Forest (verde, asfalto, densidad → °C) predice antes/después de añadir el parque en las celdas a ≤150 m | Modelo sustituto; error medio ±0,5 °C en validación. Datos de temperatura sintéticos → se recalibra con satélite |
+| **Optimización** | max Σ pesos × (vulnerables nuevos a 300 m + equidad + personas refrescadas) sujeto a presupuesto ≤ B; las demás restricciones penalizan un 30 % cada una | Problema de cobertura máxima con presupuesto (NP-difícil): voraz por beneficio/coste + recocido simulado (1.500 iteraciones) |
+| **Coste por vecino** | coste del parque ÷ vecinos que ganan verde a 300 m | Costes de urbanización 150–320 €/m² y mantenimiento 3–6 €/m²·año: hipótesis de orden de magnitud |
+
 ### Limitaciones (honestidad)
-- **Reales**: verde por distrito, padrón por barrio, vulnerabilidad por barrio y **límites oficiales de los barrios**.
-- **Verde a escala de barrio**: el Ayuntamiento publica la superficie verde por distrito, así que en el ranking de los
-  131 barrios cada barrio hereda el m²/hab de su distrito. El inventario de zonas verdes trae direcciones, no coordenadas:
-  geocodificarlo es el siguiente paso.
-- **Parques existentes**: 203 parques y jardines oficiales con coordenadas, pero sin superficie: radio aproximado
-  (150 m parques, 50 m jardines). No incluye plazas pequeñas, así que el déficit puede estar algo sobrestimado.
-  Siguiente paso: polígonos de OpenStreetMap o Copernicus Urban Atlas.
+- **Reales**: verde por distrito, padrón y vulnerabilidad por barrio, **límites oficiales de los barrios** y zonas verdes.
+- **Verde por barrio**: el Ayuntamiento solo lo publica por distrito; lo calculamos con OpenStreetMap (colaborativo:
+  puede faltar o sobrar alguna zona; descartamos jardines sin nombre, que suelen ser patios privados). Validación
+  siguiente: Copernicus Urban Atlas o el inventario municipal geocodificado.
+- **Parques existentes**: los 203 parques municipales no traen superficie (radio aproximado); las zonas de
+  OpenStreetMap sí (radio equivalente a su superficie). Las distancias son en línea recta, no a pie.
 - **Sintéticos**: reparto de la población dentro de cada barrio, edades por celda, temperatura y solares candidatos.
   El Random Forest se recalibraría con temperatura satelital real (Landsat/Sentinel) y sensores IoT.
 La versión en inglés cubre títulos, pestañas y explicaciones; el resto del contenido está en español.

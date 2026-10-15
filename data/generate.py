@@ -5,6 +5,8 @@ REALES (datos.madrid.es, en data/raw/):
   - Ranking de vulnerabilidad de distritos y barrios 2020 (dataset 300301)
   - Límites oficiales de barrios (geoportal.madrid.es, TopoJSON)
   - Principales parques y jardines municipales con coordenadas (dataset 200761)
+OPENSTREETMAP (Overpass, leisure=park|garden): 3.600+ zonas verdes con contorno -> superficie, parques bolsillo
+(<5.000 m²) y verde REAL por barrio.
 SINTÉTICOS (calibrados con los reales), para CADA distrito: cuadrícula de 100 m recortada a su silueta real, población
 por barrio real, edades, temperatura y solares candidatos para parques bolsillo.
 Salidas: data/distritos.csv, data/barrios.csv, data/parques_existentes.csv y data/distritos/<slug>/*.csv
@@ -103,8 +105,63 @@ PARQUES = pd.DataFrame([{
 } for x in pj if "location" in x])
 PARQUES.to_csv(OUT / "parques_existentes.csv", index=False)
 
-CELDA, ANILLO_M = 100, 300
+# Zonas verdes de OpenStreetMap (leisure=park|garden, con contorno): superficie real y parques bolsillo.
+# Los jardines sin nombre suelen ser patios privados: se descartan.
 M_LON, M_LAT = 84_500, 111_000  # metros por grado a ~40,4° N
+
+
+def area_m2(coords):
+    x = (coords[:, 0] - coords[:, 0].mean()) * M_LON
+    y = (coords[:, 1] - coords[:, 1].mean()) * M_LAT
+    return abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))) / 2
+
+
+osm = []
+for e in json.loads((RAW / "osm_verde.json").read_text(encoding="utf-8"))["elements"]:
+    t = e.get("tags", {})
+    if t.get("leisure") == "garden" and "name" not in t:
+        continue
+    if e["type"] == "way":
+        anillos = [e.get("geometry", [])]
+    else:
+        anillos = [m.get("geometry", []) for m in e.get("members", []) if m.get("role") == "outer"]
+    anillos = [np.array([[g["lon"], g["lat"]] for g in a]) for a in anillos if len(a) >= 4]
+    if not anillos:
+        continue
+    m2 = sum(area_m2(a) for a in anillos)
+    todos = np.vstack(anillos)
+    if m2 < 100:  # alcorques y medianas: no son zonas verdes de estancia
+        continue
+    osm.append({"nombre": t.get("name", "Zona verde sin nombre"), "lon": todos[:, 0].mean(), "lat": todos[:, 1].mean(),
+                "m2": round(m2), "radio_m": round(float(np.sqrt(m2 / np.pi)), 1), "bolsillo": m2 < 5000})
+OSM = pd.DataFrame(osm)
+OSM["cod_barrio"] = 0
+for _, cb, _, poly in POLIS:
+    m = (OSM["cod_barrio"] == 0).to_numpy() & dentro(OSM["lon"].to_numpy(), OSM["lat"].to_numpy(), poly)
+    OSM.loc[m, "cod_barrio"] = cb
+OSM.to_csv(OUT / "verde_osm.csv", index=False)
+
+# Ranking de barrios con verde REAL por barrio (OpenStreetMap), no heredado del distrito
+vb_osm = OSM[OSM["cod_barrio"] > 0].groupby("cod_barrio").agg(m2_verde_barrio=("m2", "sum"),
+                                                               parques_bolsillo=("bolsillo", "sum")).reset_index()
+b = b.drop(columns=["prioridad", "puesto"]).merge(vb_osm, on="cod_barrio", how="left").fillna(
+    {"m2_verde_barrio": 0, "parques_bolsillo": 0})
+b["m2_hab_barrio"] = (b["m2_verde_barrio"] / b["poblacion"]).round(2)
+vul_norm = 1 - (b["ranking_vulnerabilidad"] - 1) / 130
+verde_norm = 1 - np.clip(b["m2_hab_barrio"], 0, 15) / 15  # 15 m²/hab o más = sin déficit
+b["prioridad"] = (0.6 * vul_norm + 0.4 * verde_norm).round(3)
+b = b.sort_values("prioridad", ascending=False)
+b["puesto"] = range(1, len(b) + 1)
+b["parques_bolsillo"] = b["parques_bolsillo"].astype(int)
+b.to_csv(OUT / "barrios.csv", index=False)
+
+# Acceso según la OMS Europa: espacio verde de al menos 0,5 ha a <300 m. Los parques bolsillo existentes cuentan en el
+# verde por barrio, pero no como acceso OMS: el parque bolsillo nuevo es la micro-intervención para quien no lo tiene.
+MIN_OMS_M2 = 5000
+VERDE = pd.concat([OSM[OSM["m2"] >= MIN_OMS_M2][["lat", "lon", "radio_m"]], PARQUES[["lat", "lon", "radio_m"]]],
+                  ignore_index=True)
+
+CELDA, ANILLO_M = 100, 300
 TIPOS = {  # tipo: (m2 min, m2 max, plazas de aparcamiento perdidas por 100 m2)
     "Solar municipal vacío": (300, 1500, 0),
     "Interior de manzana": (200, 800, 0),
@@ -140,10 +197,10 @@ def generar_distrito(cod: int, nombre: str):
     en_anillo = ~mio & (d_mio * CELDA <= ANILLO_M)
 
     # Distancia al parque real más cercano, sea del distrito que sea
-    pxy = np.column_stack([(PARQUES["lon"] - lon0) * M_LON, (PARQUES["lat"] - lat0) * M_LAT])
+    pxy = np.column_stack([(VERDE["lon"] - lon0) * M_LON, (VERDE["lat"] - lat0) * M_LAT])
     cxy = np.column_stack([(g_lon - lon0) * M_LON, (g_lat - lat0) * M_LAT])
-    dd = np.hypot(cxy[:, None, 0] - pxy[None, :, 0], cxy[:, None, 1] - pxy[None, :, 1]) - PARQUES["radio_m"].values[None]
-    dist_verde = dd.min(axis=1)
+    dk, ik = cKDTree(pxy).query(cxy, k=12)  # 12 zonas verdes más cercanas a cada celda
+    dist_verde = (dk - VERDE["radio_m"].to_numpy()[ik]).min(axis=1)
 
     dist_dir = OUT / "distritos" / slug(nombre)
     dist_dir.mkdir(parents=True, exist_ok=True)
