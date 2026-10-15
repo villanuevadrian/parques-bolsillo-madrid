@@ -230,7 +230,7 @@ with tabs[3]:
 # ---------- 5. Sobre el proyecto ----------
 with tabs[4]:
     st.success("**Impacto:** con 500.000 € en Tetuán, los mayores y niños con un parque a menos de 300 m pasan "
-               "del **20 % al 47 %**, sin superar los límites de aparcamiento, mantenimiento y equidad.")
+               "del **22 % al 47 %**, sin superar los límites de aparcamiento, mantenimiento y equidad.")
     st.markdown(f"""
 ### Problema
 Madrid quiere acercar el verde a sus vecinos, pero el presupuesto es limitado. Los m² de verde por habitante engañan:
