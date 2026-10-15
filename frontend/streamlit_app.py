@@ -16,8 +16,12 @@ st.set_page_config(page_title="Parques bolsillo Madrid", page_icon="🌳", layou
 
 # ---------- Accesibilidad ----------
 with st.sidebar:
+    seccion = st.radio("Sección", ["🗺️ Herramienta", "ℹ️ Sobre el proyecto"])
+    st.divider()
     st.header("♿ Accesibilidad")
-    idioma = st.radio("Idioma / Language", ["es", "en"], horizontal=True)
+    idioma = st.radio("Idioma / Language", ["es", "en"], horizontal=True,
+                      format_func=lambda x: "Español" if x == "es" else "English (beta)",
+                      help="English (beta): titles, tabs and AI-generated texts. The rest is in Spanish.")
     facil = st.toggle("Lectura fácil (vecinos y personas mayores)")
     grande = st.toggle("Texto grande")
     contraste = st.toggle("Alto contraste")
@@ -33,10 +37,10 @@ if css:
 
 T = {  # textos ES/EN
     "es": {"titulo": "🌳 Parques bolsillo: dónde invertir cada euro para acercar el verde a quien más lo necesita",
-           "tab": ["Ciudad (datos reales)", "Diagnóstico del distrito", "Optimizador", "Detalle del parque", "Sobre el proyecto"],
+           "tab": ["Ciudad (datos reales)", "Diagnóstico del distrito", "Optimizador", "Detalle del parque"],
            "boton": "Calcular la mejor cartera de parques", "leer": "🔊 Leer en voz alta"},
     "en": {"titulo": "🌳 Pocket parks: where to invest every euro to bring green space to those who need it most",
-           "tab": ["City (real data)", "District diagnosis", "Optimizer", "Park detail", "About"],
+           "tab": ["City (real data)", "District diagnosis", "Optimizer", "Park detail"],
            "boton": "Find the best park portfolio", "leer": "🔊 Read aloud"},
 }[idioma]
 ESTILO = "facil" if facil else "pleno"
@@ -66,6 +70,11 @@ def api(path, metodo="get", **kw):
     except httpx.HTTPError as e:
         st.error(f"No conecto con la API en {API} ({type(e).__name__}). ¿Está arrancada? (uvicorn app.main:app)")
         st.stop()
+
+
+def miles(x) -> str:
+    """12500 -> '12.500' (formato español), sin tocar las comas del texto."""
+    return f"{x:,.0f}".replace(",", ".")
 
 
 def rgba(hex_color: str) -> list[int]:
@@ -205,8 +214,83 @@ def color_deficit(v: float) -> str:
     return f"#{r:02x}{g:02x}{b:02x}d0"
 
 
+# ---------- Sobre el proyecto (sección independiente: no depende del distrito) ----------
+def sobre_el_proyecto():
+    st.header("ℹ️ Sobre el proyecto")
+    st.info("**En una frase:** un motor de decisión que le dice al técnico municipal **qué barrios** tienen déficit de "
+            "verde, **dónde** poner cada parque bolsillo y **qué construir** en él para que más mayores y niños tengan "
+            "verde a menos de 300 m, con el presupuesto que hay y justificándolo ante el pleno.")
+    st.markdown(f"""
+### Problema
+Los m² de verde por habitante engañan: el centro tiene menos verde, pero en los barrios **vulnerables** mayores y niños
+viven **lejos** de un parque y sufren más el **calor**. El presupuesto es limitado y hay que justificar cada euro.
+
+### Usuario
+**Técnico municipal** (Junta de Distrito / Medio Ambiente) que decide y **defiende ante el pleno** dónde invertir.
+Los vecinos reciben la misma propuesta en **lectura fácil** y con lectura en voz alta.
+
+### Solución: tres decisiones encadenadas
+1. **Qué barrios**: ranking de los 131 barrios (vulnerabilidad oficial + verde real por barrio) y mapa de déficit de cada
+   uno de los 21 distritos con el criterio de la **OMS** (espacio verde de ≥0,5 ha a menos de 300 m).
+2. **Dónde**: optimización de cobertura máxima con presupuesto y restricciones (voraz + **recocido simulado**),
+   **validada frente al óptimo exacto** por programación lineal entera (98,8–100 % del óptimo).
+3. **Qué construir**: diseño óptimo de cada parque (arbolado, sombra y bancos, juegos, fuente…) según los mayores, niños
+   y calor de su entorno.
+
+Además: curva de escenarios de presupuesto, **informe para el pleno** descargable y textos redactados por **IA generativa**
+(con respaldo por plantilla: el servicio nunca se cae). Random Forest como modelo sustituto de la temperatura (±{health['mae_temperatura']} °C).
+
+### Métricas
+- **De éxito**: % de mayores y niños con verde OMS o parque bolsillo nuevo a <300 m · m² de verde por habitante ·
+  °C de reducción · coste por vecino beneficiado.
+- **De restricción**: presupuesto · plazas de aparcamiento eliminadas · mantenimiento anual · % de inversión en barrios vulnerables.
+
+### Datos
+| Reales | Sintéticos (calibrados con los reales) |
+|---|---|
+| datos.madrid.es: padrón por barrio 2026, ranking de vulnerabilidad, verde por distrito, **límites oficiales de los 131 barrios**, 203 parques municipales · OpenStreetMap: **3.668 zonas verdes con su contorno** | Reparto de la población dentro de cada barrio (suma exacta al padrón), edades por celda, temperatura, solares candidatos y costes |
+
+### Inclusión y sostenibilidad
+Prioriza a mayores, niños y barrios vulnerables. Lectura fácil, texto grande, alto contraste, modo oscuro, ES/EN, voz y
+descripción textual de mapas y gráficos; estados con icono **y** texto. Menos islas de calor, xerojardinería y jardines de
+lluvia, mantenimiento como restricción, modelos ligeros en CPU. ODS 3, 10, 11 y 13.
+
+### Negocio y escalabilidad
+**SaaS B2G** para ayuntamientos (suscripción anual). API-first: funciona ya en los 21 distritos y se replica en otra ciudad
+cambiando la fuente de datos (portales abiertos, OpenStreetMap, Copernicus). **IoT** (sensores de temperatura y afluencia)
+para medir el impacto real tras construir y recalibrar el modelo.
+
+### Limitaciones
+- **Solares candidatos, costes y temperatura son sintéticos**: en producción, inventario de suelo municipal, catastro y
+  temperatura satelital (Landsat/Sentinel).
+- **OpenStreetMap es colaborativo**: puede faltar o sobrar alguna zona; se descartan jardines sin nombre (suelen ser patios privados).
+- Los 203 parques municipales no traen contorno (radio aproximado). **Distancias en línea recta**, no a pie.
+- Ranking de vulnerabilidad de **2020** (último publicado). En distritos sin barrios vulnerables la restricción de equidad no aplica.
+- El texto de la IA puede contener erratas: se indica su fuente y debe revisarse antes de presentarlo.
+- La versión en inglés cubre títulos, pestañas y explicaciones; el resto está en español.
+""")
+    with st.expander("📐 Metodología y cálculos: cómo se obtiene cada número"):
+        st.markdown("""
+| Cálculo | Fórmula | Justificación / fuente |
+|---|---|---|
+| **Acceso a verde (KPI principal)** | % de mayores (≥65) y niños (<12) cuya celda está a ≤300 m en línea recta de un espacio verde de ≥0,5 ha | Indicador de la **OMS Europa** (*Urban green spaces: a brief for action*, 2017): verde de 0,5–1 ha a 300 m |
+| **Distancia al verde** | distancia en línea recta del centro de la celda al **borde real** más cercano de una zona verde de ≥0,5 ha (borde muestreado cada 20 m; 0 si la celda está dentro) | Contornos de OpenStreetMap. Los 203 parques municipales sin contorno: centro + radio 150 m (parque) / 50 m (jardín) |
+| **Verde por habitante** | m² de verde ÷ padrón | Distrito: dato oficial del Ayuntamiento. Barrio: suma de zonas OSM dentro del límite oficial del barrio |
+| **Prioridad de barrio** | 0,6 × vulnerabilidad + 0,4 × déficit verde (1 − min(m²/hab, 15)/15) | Vulnerabilidad: ranking oficial del Ayuntamiento. 15 m²/hab: rango alto de las recomendaciones habituales (9–15). Pesos: hipótesis editable |
+| **Índice de déficit de celda** | 0,45 × lejanía (dist/600 m) + 0,30 × calor (normalizado) + 0,25 × vulnerabilidad | Pondera la proximidad (criterio OMS) por encima del calor y la equidad. Pesos: hipótesis editable |
+| **Bajada de temperatura** | Random Forest (verde, asfalto, densidad → °C) predice antes/después de añadir el parque en las celdas a ≤150 m | Modelo sustituto; error medio ±0,5 °C en validación. Datos de temperatura sintéticos → se recalibra con satélite |
+| **Optimización** | max Σ pesos × (vulnerables nuevos a 300 m + equidad + personas refrescadas) sujeto a presupuesto ≤ B; las demás restricciones penalizan un 30 % cada una | Problema de cobertura máxima con presupuesto (NP-difícil): voraz por beneficio/coste + recocido simulado (1.500 iteraciones) |
+| **Validación** | óptimo exacto por programación lineal entera (HiGHS): max Σ w·y, y_j ≤ Σ x_i que cubren j, Σ coste·x ≤ presupuesto | El recocido alcanza el 98,8–100 % del óptimo en los distritos probados; 2,7–9× mejor que carteras al azar |
+| **Qué construir** | por parque, mochila exacta sobre 8 elementos (2⁸ = 256 combinaciones): max Σ utilidad sujeto a m² ≤ 85 % del solar y coste ≤ 35 % del presupuesto del parque; utilidad = Σ peso × beneficio (mayores, niños, calor, agua) | Pesos = proporción real de mayores y niños a <300 m e índice de calor de la zona; agua con peso fijo 0,3. Huella, coste y beneficio de cada elemento: hipótesis de orden de magnitud |
+| **Coste por vecino** | coste del parque ÷ vecinos que ganan verde a 300 m | Costes de urbanización 150–320 €/m² y mantenimiento 3–6 €/m²·año: hipótesis de orden de magnitud |
+""")
+
+
 st.title(T["titulo"])
 health = api("/health")
+if seccion == "ℹ️ Sobre el proyecto":
+    sobre_el_proyecto()
+    st.stop()
 distrito = st.selectbox("📍 Distrito a analizar (cada uno con su mapa, su padrón y sus parques reales)",
                         health["distritos"], index=health["distritos"].index("Tetuán"))
 diag = api("/diagnostico", params={"distrito": distrito})
@@ -316,8 +400,13 @@ with tabs[2]:
         st.markdown("**Restricciones** (icono + texto, no solo color)")
         nombres = {"presupuesto": "Presupuesto", "plazas_aparcamiento": "Plazas de aparcamiento",
                    "mantenimiento_anual": "Mantenimiento anual", "equidad_pct_inversion": "% inversión en barrios vulnerables"}
+        hay_vulnerables = any(b["vulnerabilidad"] >= 0.65 for b in diag["barrios"])
         for n, x in r["restricciones"].items():
             signo = "≥" if n == "equidad_pct_inversion" else "≤"
+            if n == "equidad_pct_inversion" and not hay_vulnerables:
+                st.write(f"ℹ️ No aplica — {nombres[n]}: ningún barrio de {distrito} está entre los más vulnerables de "
+                         "Madrid (ranking municipal), así que toda la inversión va a barrios no prioritarios.")
+                continue
             st.write(f"{'✅ Cumple' if x['ok'] else '❌ No cumple'} — {nombres[n]}: "
                      f"{x['valor']:,.0f} (límite {signo} {x['limite']:,.0f})".replace(",", "."))
 
@@ -359,8 +448,8 @@ with tabs[2]:
             st.dataframe(e.rename(columns={"pct_vulnerables_300m": "% mayores y niños a <300 m",
                                            "pp_por_100k": "puntos ganados por cada 100.000 € extra"}), hide_index=True)
             st.caption(f"Descripción del gráfico: partiendo del {esc['base']} %, los primeros 100.000 € aportan "
-                       f"{e.iloc[0]['pp_por_100k']} puntos por cada 100.000 €; con {e.iloc[-1]['presupuesto']:,} € el "
-                       f"último tramo aporta {e.iloc[-1]['pp_por_100k']}. Ayuda a decidir hasta dónde compensa invertir.".replace(",", "."))
+                       f"{e.iloc[0]['pp_por_100k']} puntos por cada 100.000 €; con {miles(e.iloc[-1]['presupuesto'])} € el "
+                       f"último tramo aporta {e.iloc[-1]['pp_por_100k']}. Ayuda a decidir hasta dónde compensa invertir.")
         pres_cartera = int(r["restricciones"]["presupuesto"]["limite"])  # el de la cartera mostrada, no el del slider
         if st.toggle("🔬 Validar el algoritmo frente al óptimo exacto"):
             with st.spinner("Resolviendo el óptimo exacto (programación lineal entera)…"):
@@ -374,10 +463,10 @@ with tabs[2]:
                 v1.metric("Recocido simulado", f"{v['recocido_pct_optimo']} % del óptimo")
                 v2.metric("Voraz", f"{v['voraz_pct_optimo']} % del óptimo")
                 v3.metric("Frente a elegir al azar", f"{v['veces_mejor_que_azar']}× mejor")
-                st.caption(f"Objetivo de cobertura pura (mayores y niños que ganan verde a <300 m) con {pres_cartera:,} €. "
-                           f"Óptimo exacto: {v['optimo_exacto']:,} personas, calculado con programación lineal entera "
+                st.caption(f"Objetivo de cobertura pura (mayores y niños que ganan verde a <300 m) con {miles(pres_cartera)} €. "
+                           f"Óptimo exacto: {miles(v['optimo_exacto'])} personas, calculado con programación lineal entera "
                            f"(solver HiGHS: {v['estado_solver'].split('(')[-1].rstrip(')')}). Azar: media de 1.000 "
-                           f"carteras aleatorias del mismo presupuesto ({v['azar_medio']:,} personas).".replace(",", "."))
+                           f"carteras aleatorias del mismo presupuesto ({miles(v['azar_medio'])} personas).")
     else:
         st.caption("Ajusta presupuesto, restricciones y prioridades y pulsa el botón.")
 
@@ -414,76 +503,3 @@ with tabs[3]:
             st.write("**¿Qué influye más en la temperatura?** (explicabilidad del modelo)")
             st.bar_chart(pd.Series(diag["importancias"]))
             st.caption(f"Descripción del gráfico: la variable más influyente es «{next(iter(diag['importancias']))}».")
-
-# ---------- 5. Sobre el proyecto ----------
-with tabs[4]:
-    ej = impacto_ejemplo(distrito)
-    st.success(f"**Impacto en {distrito}:** con 500.000 €, los mayores y niños con un parque a menos de 300 m pasan "
-               f"del **{ej['kpis_antes']['pct_vulnerables_300m']} % al {ej['kpis_despues']['pct_vulnerables_300m']} %**, "
-               "respetando los límites de aparcamiento, mantenimiento y equidad. Funciona en los 21 distritos.")
-    st.markdown(f"""
-### Problema
-Madrid quiere acercar el verde a sus vecinos, pero el presupuesto es limitado. Los m² de verde por habitante engañan:
-el centro tiene menos verde, pero los barrios **vulnerables** sufren más el **calor** y tienen a mayores y niños **lejos** de un parque.
-
-### Usuario
-**Técnico municipal** (Junta de Distrito / Medio Ambiente) que debe decidir y **justificar ante el pleno** dónde invertir.
-Los vecinos reciben la misma propuesta en **lectura fácil**.
-
-### Solución
-Motor de decisión que **detecta** el déficit (proximidad + calor + vulnerabilidad) y **optimiza** dónde construir parques bolsillo:
-- **Optimización con restricciones**: cobertura máxima con presupuesto; voraz + **recocido simulado** (metaheurística).
-- **ML**: Random Forest como modelo sustituto de la temperatura (error ±{health['mae_temperatura']} °C) → °C que baja cada parque.
-- **IA generativa**: informe para el pleno y ficha en lectura fácil, con *fallback*: el servicio nunca se cae.
-
-### Métricas
-- **De éxito**: % de mayores y niños con un espacio verde de ≥0,5 ha a <300 m (criterio OMS Europa) o con un parque
-  bolsillo nuevo (la micro-intervención para quien no lo tiene), m²/habitante, °C de reducción, coste por vecino.
-- **De restricción**: presupuesto, plazas de aparcamiento, mantenimiento anual, % de inversión en barrios vulnerables.
-
-### Datos
-**Reales** (datos.madrid.es): zonas verdes por distrito, padrón por barrio 2026, ranking de vulnerabilidad.
-**Reales también**: límites oficiales de los 131 barrios, 203 parques municipales con coordenadas y **3.668 zonas
-verdes de OpenStreetMap con su contorno** (2.202 de tamaño parque bolsillo, <5.000 m²) → verde real por barrio.
-**Sintéticos calibrados**: cuadrícula de 100 m de cada distrito (la población suma el padrón real de cada barrio), temperatura y solares candidatos.
-Siguiente paso: inventario de zonas verdes georreferenciado, temperatura satelital (Copernicus) y suelo municipal disponible.
-
-### Inclusión
-Prioriza a mayores, niños y barrios vulnerables. Lectura fácil, texto grande, alto contraste, modo oscuro, bilingüe,
-voz y descripción textual de mapas y gráficos. Las restricciones se muestran con icono **y** texto.
-
-### Sostenibilidad
-Menos islas de calor, especies de bajo consumo de agua (m³/año por parque), coste de mantenimiento como restricción.
-Modelos ligeros en CPU. ODS 3, 10, 11 y 13.
-
-### Modelo de negocio y escalabilidad
-**SaaS B2G** para ayuntamientos: suscripción anual por municipio. Arquitectura API-first: se replica en cualquier ciudad
-cambiando la fuente de datos: Copernicus Urban Atlas (verde), temperatura de superficie Landsat/Sentinel, catastro
-y portales de datos abiertos (Barcelona, Valencia…). **IoT** (sensores de temperatura y afluencia) para medir el impacto real tras construir
-y reentrenar el modelo: el ciclo de decisión se cierra con datos.
-
-### Metodología y cálculos (cómo se obtiene cada número)
-| Cálculo | Fórmula | Justificación / fuente |
-|---|---|---|
-| **Acceso a verde (KPI principal)** | % de mayores (≥65) y niños (<12) cuya celda está a ≤300 m en línea recta de un espacio verde de ≥0,5 ha | Indicador de la **OMS Europa** (*Urban green spaces: a brief for action*, 2017): verde de 0,5–1 ha a 300 m |
-| **Distancia al verde** | distancia en línea recta del centro de la celda al **borde real** más cercano de una zona verde de ≥0,5 ha (borde muestreado cada 20 m; 0 si la celda está dentro) | Contornos de OpenStreetMap. Los 203 parques municipales sin contorno: centro + radio 150 m (parque) / 50 m (jardín) |
-| **Verde por habitante** | m² de verde ÷ padrón | Distrito: dato oficial del Ayuntamiento. Barrio: suma de zonas OSM dentro del límite oficial del barrio |
-| **Prioridad de barrio** | 0,6 × vulnerabilidad + 0,4 × déficit verde (1 − min(m²/hab, 15)/15) | Vulnerabilidad: ranking oficial del Ayuntamiento. 15 m²/hab: rango alto de las recomendaciones habituales (9–15). Pesos: hipótesis editable |
-| **Índice de déficit de celda** | 0,45 × lejanía (dist/600 m) + 0,30 × calor (normalizado) + 0,25 × vulnerabilidad | Pondera la proximidad (criterio OMS) por encima del calor y la equidad. Pesos: hipótesis editable |
-| **Bajada de temperatura** | Random Forest (verde, asfalto, densidad → °C) predice antes/después de añadir el parque en las celdas a ≤150 m | Modelo sustituto; error medio ±0,5 °C en validación. Datos de temperatura sintéticos → se recalibra con satélite |
-| **Optimización** | max Σ pesos × (vulnerables nuevos a 300 m + equidad + personas refrescadas) sujeto a presupuesto ≤ B; las demás restricciones penalizan un 30 % cada una | Problema de cobertura máxima con presupuesto (NP-difícil): voraz por beneficio/coste + recocido simulado (1.500 iteraciones) |
-| **Validación** | óptimo exacto por programación lineal entera (HiGHS): max Σ w·y, y_j ≤ Σ x_i que cubren j, Σ coste·x ≤ presupuesto | El recocido alcanza el 98,8–100 % del óptimo en los distritos probados; 2,7–9× mejor que carteras al azar |
-| **Qué construir** | por parque, mochila exacta sobre 8 elementos (2⁸ = 256 combinaciones): max Σ utilidad sujeto a m² ≤ 85 % del solar y coste ≤ 35 % del presupuesto del parque; utilidad = Σ peso × beneficio (mayores, niños, calor, agua) | Pesos = proporción real de mayores y niños a <300 m e índice de calor de la zona; agua con peso fijo 0,3. Huella, coste y beneficio de cada elemento: hipótesis de orden de magnitud |
-| **Coste por vecino** | coste del parque ÷ vecinos que ganan verde a 300 m | Costes de urbanización 150–320 €/m² y mantenimiento 3–6 €/m²·año: hipótesis de orden de magnitud |
-
-### Limitaciones (honestidad)
-- **Reales**: verde por distrito, padrón y vulnerabilidad por barrio, **límites oficiales de los barrios** y zonas verdes.
-- **Verde por barrio**: el Ayuntamiento solo lo publica por distrito; lo calculamos con OpenStreetMap (colaborativo:
-  puede faltar o sobrar alguna zona; descartamos jardines sin nombre, que suelen ser patios privados). Validación
-  siguiente: Copernicus Urban Atlas o el inventario municipal geocodificado.
-- **Parques existentes**: los 203 parques municipales no traen superficie (radio aproximado); las zonas de
-  OpenStreetMap sí (radio equivalente a su superficie). Las distancias son en línea recta, no a pie.
-- **Sintéticos**: reparto de la población dentro de cada barrio, edades por celda, temperatura y solares candidatos.
-  El Random Forest se recalibraría con temperatura satelital real (Landsat/Sentinel) y sensores IoT.
-La versión en inglés cubre títulos, pestañas y explicaciones; el resto del contenido está en español.
-""")
