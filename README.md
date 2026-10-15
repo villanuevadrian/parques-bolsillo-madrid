@@ -1,124 +1,132 @@
-# 🌳 Parques bolsillo Madrid — dónde invertir cada euro para acercar el verde a quien más lo necesita
+# 🌳 Pocket Parks Madrid — where to invest every euro to bring green space to those who need it most
 
-> Motor de decisión para técnicos municipales: **detecta** los barrios con déficit de zonas verdes, **decide dónde** poner
-> cada parque bolsillo y **qué construir** en él, y lo **justifica** ante el pleno. Datos abiertos reales de Madrid,
-> optimización validada frente al óptimo exacto e IA generativa.
+🇬🇧 **English** · 🇪🇸 [Español](README.es.md)
 
-- **Autor:** [villanuevadrian](https://github.com/villanuevadrian), en representación de la **Universidad Carlos III de Madrid (UC3M)**
-- **Contexto:** prueba técnica de 2 horas del programa **Líderes Digitales Universitarios** (Cátedras Telefónica)
-- **Reto #42 · Pilar Salud y Bienestar Urbano:** *«Diseña una app que detecte barrios con déficit de zonas verdes y proponga
-  micro-intervenciones (parques bolsillo)»*
+> A decision engine for city officials: it **detects** neighbourhoods lacking green space, **decides where** to build each
+> pocket park and **what to build** in it, and **justifies** the investment to the city council. Real open data from
+> Madrid, optimisation validated against the exact optimum, and generative AI.
 
-![Diagnóstico de Tetuán: déficit de verde por manzana sobre los límites oficiales de barrio y los contornos reales de las zonas verdes](docs/img/02_diagnostico.jpg)
+- **Author:** [villanuevadrian](https://github.com/villanuevadrian), representing **Universidad Carlos III de Madrid (UC3M)**
+- **Programme:** **Líderes Digitales Universitarios** (University Digital Leaders, Cátedras Telefónica), in two stages:
+  1. **2-hour technical challenge at 42 Madrid**: design and build a solution to an urban challenge.
+  2. **Debate at Madrid City Council** on competitive smart cities: with AI vs. without AI.
+- **Challenge #42 · Health and Urban Wellbeing:** *"Design an app that detects neighbourhoods with a green-space deficit and
+  proposes micro-interventions (pocket parks)."*
 
-## Resultados clave
-- **Tetuán, 500.000 €:** los mayores y niños con un espacio verde a menos de 300 m (criterio OMS) pasan del **57 % al 82 %**,
-  cumpliendo los límites de aparcamiento, mantenimiento y equidad.
-- **Validado:** la metaheurística alcanza el **98,8–100 % del óptimo exacto** (programación lineal entera) y es
-  **2,7–9 veces mejor** que repartir parques al azar.
-- **Escala:** funciona en los **21 distritos** y prioriza los **131 barrios** de Madrid con datos oficiales.
+![Tetuán diagnosis: green-space deficit per 100 m cell over official neighbourhood boundaries and real green-area outlines](docs/img/02_diagnostico.jpg)
 
-## Qué hace: tres decisiones encadenadas
-| # | Decisión | Cómo |
+## Key results
+- **Tetuán district, €500,000:** the share of older people and children with a green space within 300 m (WHO criterion)
+  rises from **57% to 82%**, within parking, maintenance and equity constraints.
+- **Validated:** the metaheuristic reaches **98.8–100% of the exact optimum** (integer linear programming) and is
+  **2.7–9× better** than placing parks at random.
+- **Scale:** works for all **21 districts** and ranks the **131 neighbourhoods** of Madrid using official data.
+
+## What it does: three chained decisions
+| # | Decision | How |
 |---|---|---|
-| 1 | **Qué barrios** tienen déficit | Verde real por barrio (OpenStreetMap) + ranking oficial de vulnerabilidad; mapa por distrito con el criterio OMS (≥0,5 ha a 300 m) |
-| 2 | **Dónde** poner cada parque bolsillo | Cobertura máxima con presupuesto y restricciones: voraz + recocido simulado, validado con el óptimo exacto (HiGHS) |
-| 3 | **Qué construir** en cada uno | Mochila exacta sobre 8 micro-intervenciones (sombra, bancos, juegos, fuente, jardín de lluvia…) según quién vive alrededor |
+| 1 | **Which neighbourhoods** lack green space | Real green area per neighbourhood (OpenStreetMap) + official vulnerability ranking; per-district map with the WHO criterion (≥0.5 ha within 300 m) |
+| 2 | **Where** to build each pocket park | Budget-constrained maximum coverage: greedy + simulated annealing, validated against the exact optimum (HiGHS) |
+| 3 | **What to build** in each one | Exact knapsack over 8 micro-interventions (shade trees, benches, playground, fountain, rain garden…) based on who lives nearby |
 
-Además: curva de escenarios de presupuesto (rendimientos decrecientes), **informe para el pleno** descargable (HTML
-imprimible a PDF) y textos redactados por **IA generativa** (Claude) con respaldo por plantilla: el servicio nunca se cae.
+Also: budget scenario curve (diminishing returns), downloadable **council report** (HTML, printable to PDF) and texts
+written by **generative AI** (Claude) with a template fallback, so the service never goes down.
 
-| Ciudad: detección | Optimizador | Cartera propuesta | Qué construir |
+| City: detection | Optimiser | Proposed portfolio | What to build |
 |---|---|---|---|
-| ![Ciudad](docs/img/01_ciudad.jpg) | ![Optimizador](docs/img/03_optimizador.jpg) | ![Cartera](docs/img/04_cartera_mapa.jpg) | ![Diseño](docs/img/05_detalle_diseno.jpg) |
+| ![City](docs/img/01_ciudad.jpg) | ![Optimiser](docs/img/03_optimizador.jpg) | ![Portfolio](docs/img/04_cartera_mapa.jpg) | ![Design](docs/img/05_detalle_diseno.jpg) |
 
-- **Usuario:** técnico municipal (Junta de Distrito / Medio Ambiente). Los vecinos reciben la misma propuesta en lectura fácil.
-- **Accesibilidad:** lectura fácil, texto grande, alto contraste, modo oscuro, ES/EN (beta), lectura en voz alta,
-  descripción textual de mapas y gráficos y estados con icono **y** texto.
-- **Negocio:** SaaS B2G para ayuntamientos; sensores IoT para medir el impacto real tras construir y recalibrar el modelo.
+- **User:** municipal officer (district board / environment department). Residents get the same proposal in easy-to-read language.
+- **Accessibility:** easy-read mode, large text, high contrast, dark mode, ES/EN (beta), text-to-speech, text descriptions
+  of every map and chart, and statuses shown with icon **and** text.
+- **Business model:** B2G SaaS for city councils; IoT sensors to measure real impact after construction and recalibrate the model.
 
-## Arquitectura
+> The app interface is in Spanish (English beta), as it was built for Madrid City Council.
+
+## Architecture
 ```mermaid
 flowchart LR
-    R[(Datos abiertos Madrid<br/>padrón, vulnerabilidad,<br/>límites, parques)] --> G[generate.py<br/>cuadrícula de 100 m<br/>por distrito]
-    O[(OpenStreetMap<br/>3.668 zonas verdes<br/>con contorno)] --> G
-    I[(Sensores IoT<br/>roadmap)] -.-> G
-    G --> M[Modelo<br/>déficit OMS + Random Forest<br/>de temperatura]
-    M --> P[Optimizador<br/>voraz + recocido simulado]
-    P --> V[Validación<br/>óptimo exacto MILP]
-    P --> D[Diseño de cada parque<br/>mochila exacta]
-    P --> A[API REST<br/>FastAPI]
+    R[(Madrid open data<br/>census, vulnerability,<br/>boundaries, parks)] --> G[generate.py<br/>100 m grid<br/>per district]
+    O[(OpenStreetMap<br/>3,668 green areas<br/>with outlines)] --> G
+    I[(IoT sensors<br/>roadmap)] -.-> G
+    G --> M[Model<br/>WHO deficit + Random Forest<br/>temperature]
+    M --> P[Optimiser<br/>greedy + simulated annealing]
+    P --> V[Validation<br/>exact MILP optimum]
+    P --> D[Design of each park<br/>exact knapsack]
+    P --> A[REST API<br/>FastAPI]
     D --> A
-    A --> F[Frontend accesible<br/>Streamlit]
-    A --> C[Otros clientes<br/>Decide Madrid, paneles]
-    A <--> L[LLM Claude<br/>informe / lectura fácil]
-    L -. fallback .-> T[Plantilla]
+    A --> F[Accessible frontend<br/>Streamlit]
+    A --> C[Other clients<br/>Decide Madrid, dashboards]
+    A <--> L[LLM Claude<br/>council report / easy-read]
+    L -. fallback .-> T[Template]
 ```
-| Módulo | Qué hace |
+| Module | What it does |
 |---|---|
-| `data/generate.py` | Lee los datos oficiales (`data/raw/`) y OpenStreetMap; genera el ranking de barrios y la cuadrícula de cada distrito |
-| `app/model.py` | Déficit, Random Forest de temperatura, optimizador, validación MILP y diseño de cada parque |
-| `app/llm.py` | Informe para el pleno y lectura fácil con Claude; sin clave o con error → plantilla |
-| `app/main.py` | API REST: `/ciudad`, `/barrios`, `/diagnostico`, `/optimizar`, `/escenarios`, `/validacion`, `/parque/{id}` |
-| `frontend/streamlit_app.py` | Herramienta (Ciudad, Diagnóstico, Optimizador, Detalle) y sección «Sobre el proyecto» |
+| `data/generate.py` | Reads official data (`data/raw/`) and OpenStreetMap; builds the neighbourhood ranking and each district's grid |
+| `app/model.py` | Deficit, Random Forest temperature model, optimiser, MILP validation and park design |
+| `app/llm.py` | Council report and easy-read text with Claude; no key or an error → template |
+| `app/main.py` | REST API: `/ciudad`, `/barrios`, `/diagnostico`, `/optimizar`, `/escenarios`, `/validacion`, `/parque/{id}` |
+| `frontend/streamlit_app.py` | Tool (City, Diagnosis, Optimiser, Detail) and an "About the project" section |
 
-## Puesta en marcha
+## Getting started
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.lock.txt           # versiones exactas probadas
+pip install -r requirements.lock.txt           # exact tested versions
 uvicorn app.main:app --reload                  # API -> http://localhost:8000/docs
-streamlit run frontend/streamlit_app.py        # (otra terminal) app -> http://localhost:8501
+streamlit run frontend/streamlit_app.py        # (another terminal) app -> http://localhost:8501
 ```
-Los datos procesados ya vienen en el repositorio; `python data/generate.py` los regenera desde `data/raw/`.
-Opcional: copia `.env.example` a `.env` y añade tu `ANTHROPIC_API_KEY` para que los textos los redacte Claude.
-Sin clave funciona igual (textos por plantilla).
+Processed data is included in the repository; `python data/generate.py` rebuilds it from `data/raw/`.
+Optional: copy `.env.example` to `.env` and add your `ANTHROPIC_API_KEY` so Claude writes the texts.
+Without a key it works the same (template texts).
 
-## Datos y atribución
-| Fuente | Uso | Licencia / atribución |
+## Data and attribution
+| Source | Use | Licence / attribution |
 |---|---|---|
-| [Ayuntamiento de Madrid — datos.madrid.es](https://datos.madrid.es): población por barrio (1-ene-2026), ranking de vulnerabilidad (2020), superficie verde por distrito (2025), principales parques y jardines, límites de barrios | Padrón, equidad, verde oficial, geometría | Reutilización con cita de la fuente: *Ayuntamiento de Madrid* |
-| [OpenStreetMap](https://www.openstreetmap.org/copyright) (`leisure=park\|garden`, vía Overpass) | Contorno y superficie de 3.668 zonas verdes | © OpenStreetMap contributors, [ODbL](https://opendatacommons.org/licenses/odbl/) |
-| Sintéticos calibrados | Reparto de población dentro de cada barrio, edades, temperatura, solares candidatos y costes | Generados en `data/generate.py` |
+| [Madrid City Council — datos.madrid.es](https://datos.madrid.es): population per neighbourhood (1 Jan 2026), vulnerability ranking (2020), green area per district (2025), main parks and gardens, neighbourhood boundaries | Census, equity, official green area, geometry | Reuse with source citation: *Ayuntamiento de Madrid* |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) (`leisure=park\|garden`, via Overpass) | Outline and area of 3,668 green spaces | © OpenStreetMap contributors, [ODbL](https://opendatacommons.org/licenses/odbl/) |
+| Calibrated synthetic data | Population distribution within each neighbourhood, ages, temperature, candidate sites and costs | Generated in `data/generate.py` |
 
-## Metodología y cálculos (cómo se obtiene cada número)
-| Cálculo | Fórmula | Justificación / fuente |
+## Methodology (how each number is computed)
+| Calculation | Formula | Rationale / source |
 |---|---|---|
-| **Acceso a verde (KPI principal)** | % de mayores (≥65) y niños (<12) cuya celda está a ≤300 m en línea recta de un espacio verde de ≥0,5 ha | Indicador de la **OMS Europa** (*Urban green spaces: a brief for action*, 2017): verde de 0,5–1 ha a 300 m |
-| **Distancia al verde** | distancia en línea recta del centro de la celda al **borde real** más cercano de una zona verde de ≥0,5 ha (borde muestreado cada 20 m; 0 si la celda está dentro) | Contornos de OpenStreetMap. Los 203 parques municipales sin contorno: centro + radio 150 m (parque) / 50 m (jardín) |
-| **Verde por habitante** | m² de verde ÷ padrón | Distrito: dato oficial del Ayuntamiento. Barrio: suma de zonas OSM dentro del límite oficial del barrio |
-| **Prioridad de barrio** | 0,6 × vulnerabilidad + 0,4 × déficit verde (1 − min(m²/hab, 15)/15) | Vulnerabilidad: ranking oficial del Ayuntamiento. 15 m²/hab: rango alto de las recomendaciones habituales (9–15). Pesos: hipótesis editable |
-| **Índice de déficit de celda** | 0,45 × lejanía (dist/600 m) + 0,30 × calor (normalizado) + 0,25 × vulnerabilidad | Pondera la proximidad (criterio OMS) por encima del calor y la equidad. Pesos: hipótesis editable |
-| **Bajada de temperatura** | Random Forest (verde, asfalto, densidad → °C) predice antes/después de añadir el parque en las celdas a ≤150 m | Modelo sustituto; error medio ±0,5 °C en validación. Datos de temperatura sintéticos → se recalibra con satélite |
-| **Optimización** | max Σ pesos × (vulnerables nuevos a 300 m + equidad + personas refrescadas) sujeto a presupuesto ≤ B; las demás restricciones penalizan un 30 % cada una | Problema de cobertura máxima con presupuesto (NP-difícil): voraz por beneficio/coste + recocido simulado (1.500 iteraciones) |
-| **Validación** | óptimo exacto por programación lineal entera (HiGHS): max Σ w·y, y_j ≤ Σ x_i que cubren j, Σ coste·x ≤ presupuesto | El recocido alcanza el 98,8–100 % del óptimo en los distritos probados; 2,7–9× mejor que carteras al azar |
-| **Qué construir** | por parque, mochila exacta sobre 8 elementos (2⁸ = 256 combinaciones): max Σ utilidad sujeto a m² ≤ 85 % del solar y coste ≤ 35 % del presupuesto del parque; utilidad = Σ peso × beneficio (mayores, niños, calor, agua) | Pesos = proporción real de mayores y niños a <300 m e índice de calor de la zona; agua con peso fijo 0,3. Huella, coste y beneficio de cada elemento: hipótesis de orden de magnitud |
-| **Coste por vecino** | coste del parque ÷ vecinos que ganan verde a 300 m | Costes de urbanización 150–320 €/m² y mantenimiento 3–6 €/m²·año: hipótesis de orden de magnitud |
+| **Green access (main KPI)** | % of older people (≥65) and children (<12) whose cell is ≤300 m in a straight line from a green space of ≥0.5 ha | **WHO Europe** indicator (*Urban green spaces: a brief for action*, 2017): 0.5–1 ha of green within 300 m |
+| **Distance to green** | straight-line distance from the cell centre to the nearest **real edge** of a ≥0.5 ha green space (edge sampled every 20 m; 0 if the cell is inside) | OpenStreetMap outlines. The 203 municipal parks without outlines: centre + 150 m (park) / 50 m (garden) radius |
+| **Green per inhabitant** | m² of green ÷ census population | District: official council figure. Neighbourhood: sum of OSM areas inside the official boundary |
+| **Neighbourhood priority** | 0.6 × vulnerability + 0.4 × green deficit (1 − min(m²/inhab, 15)/15) | Vulnerability: official council ranking. 15 m²/inhab: upper end of common recommendations (9–15). Weights: editable assumption |
+| **Cell deficit index** | 0.45 × remoteness (dist/600 m) + 0.30 × heat (normalised) + 0.25 × vulnerability | Weighs proximity (WHO criterion) above heat and equity. Weights: editable assumption |
+| **Temperature reduction** | Random Forest (green, asphalt, density → °C) predicts before/after adding the park in cells within 150 m | Surrogate model; mean error ±0.5 °C on validation. Synthetic temperature data → recalibrate with satellite data |
+| **Optimisation** | max Σ weights × (new vulnerable residents within 300 m + equity + people cooled) subject to budget ≤ B; each other constraint applies a 30% penalty | Budgeted maximum coverage problem (NP-hard): benefit/cost greedy + simulated annealing (1,500 iterations) |
+| **Validation** | exact optimum via integer linear programming (HiGHS): max Σ w·y, y_j ≤ Σ x_i covering j, Σ cost·x ≤ budget | Simulated annealing reaches 98.8–100% of the optimum in the districts tested; 2.7–9× better than random portfolios |
+| **What to build** | per park, exact knapsack over 8 elements (2⁸ = 256 combinations): max Σ utility s.t. m² ≤ 85% of the site and cost ≤ 35% of the park budget; utility = Σ weight × benefit (older people, children, heat, water) | Weights = real share of older people and children within 300 m and the area's heat index; water has a fixed weight of 0.3. Footprint, cost and benefit of each element: order-of-magnitude assumptions |
+| **Cost per resident** | park cost ÷ residents who gain green space within 300 m | Construction cost €150–320/m² and maintenance €3–6/m²·year: order-of-magnitude assumptions |
 
-## Limitaciones
-- **Solares candidatos, costes y temperatura son sintéticos** (prueba de concepto). En producción: inventario de suelo
-  municipal, catastro y temperatura satelital (Landsat/Sentinel).
-- **OpenStreetMap es colaborativo**: puede faltar o sobrar alguna zona; se descartan jardines sin nombre (suelen ser patios privados).
-- Los parques municipales no traen contorno (radio aproximado). **Distancias en línea recta**, no a pie.
-- Ranking de vulnerabilidad de **2020** (último publicado). En distritos sin barrios vulnerables la restricción de equidad no aplica.
-- Los textos de la IA pueden contener erratas: se indica su fuente y deben revisarse antes de presentarlos.
+## Limitations
+- **Candidate sites, costs and temperature are synthetic** (proof of concept). In production: municipal land inventory,
+  cadastre and satellite land-surface temperature (Landsat/Sentinel).
+- **OpenStreetMap is crowdsourced**: some areas may be missing or extra; unnamed gardens are discarded (usually private courtyards).
+- Municipal parks have no outline (approximate radius). **Straight-line distances**, not walking distances.
+- Vulnerability ranking from **2020** (latest published). In districts with no vulnerable neighbourhoods the equity constraint does not apply.
+- AI-generated texts may contain errors: their source is shown and they should be reviewed before being presented.
 
 ## Tests
 ```bash
-python -m pytest -q          # 26 tests: API, auditoría de cálculos y validación frente al óptimo exacto (sin red)
-./scripts/smoke.sh           # punta a punta: API real + Streamlit
+python -m pytest -q          # 26 tests: API, calculation audit and validation against the exact optimum (offline)
+./scripts/smoke.sh           # end to end: real API + Streamlit
 ```
-Incluyen tests de **auditoría** que recalculan de forma independiente que cada celda cae en su barrio oficial, que la
-población coincide con el padrón y que la cobertura del optimizador es correcta.
+Includes **audit** tests that independently recompute that every cell falls within its official neighbourhood, that
+population matches the census and that the optimiser's coverage is correct.
 
-## Cómo se desarrolló
-Construido en 2 horas con **Claude Code** como asistente de programación, con un flujo de ingeniería de software ligera:
-1. **Plan antes de código** y aprobación de cada decisión (reto, usuario, métricas de éxito y de restricción).
-2. **Pasos pequeños con tests** después de cada cambio (`pytest` + `scripts/smoke.sh`) y un commit por paso.
-3. **Agente revisor independiente** (`.claude/agents/jurado.md`) que evalúa la app con la rúbrica del jurado sin haber
-   visto el desarrollo; se aplicaron sus mejoras prioritarias.
-4. **Auditoría de cálculos**: cada número se recalcula por separado y se valida el optimizador contra el óptimo exacto.
+## How it was built
+The core was built during the 2-hour challenge at 42 Madrid, then extended and audited for publication (OpenStreetMap
+outlines, validation against the exact optimum, park design, council report). Developed with **Claude Code** as a coding
+assistant, following a lightweight software engineering workflow:
+1. **Plan before code**, approving each decision (challenge, user, success and constraint metrics).
+2. **Small steps with tests** after every change (`pytest` + `scripts/smoke.sh`) and one commit per step.
+3. **Independent reviewer agent** (`.claude/agents/jurado.md`) that scores the app against the jury's rubric without having
+   seen the development; its top-priority improvements were applied.
+4. **Calculation audit**: every number is recomputed independently and the optimiser is validated against the exact optimum.
 
-`CLAUDE.md` recoge las reglas de trabajo y `PROMPT_ARRANQUE.md` el prompt de preparación de la prueba.
+`CLAUDE.md` holds the working rules and `PROMPT_ARRANQUE.md` the preparation prompt (both in Spanish).
 
-## Licencia
-Código bajo licencia [MIT](LICENSE). Los datos conservan su licencia original (ver *Datos y atribución*).
+## Licence
+Code under the [MIT](LICENSE) licence. Data keeps its original licence (see *Data and attribution*).
