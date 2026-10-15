@@ -29,7 +29,7 @@ def _fallback_cartera(r: dict, estilo: str, idioma: str) -> str:
                 f"within 300 m rise from {a['pct_vulnerables_300m']}% to {d['pct_vulnerables_300m']}%. "
                 f"{d['personas_refrescadas']:,} people get cooler streets in heat waves.")
     if estilo == "facil":
-        return (f"Vamos a crear {n} parques pequeños en Tetuán. Más mayores y niños tendrán un parque cerca de casa. "
+        return (f"Vamos a crear {n} parques pequeños en {r.get('distrito', 'tu distrito')}. Más mayores y niños tendrán un parque cerca de casa. "
                 f"En verano, sus calles estarán más frescas.")
     ok = sum(x["ok"] for x in r["restricciones"].values())
     return (f"Se proponen {n} parques bolsillo con una inversión de {_n(d['inversion'])} €. La población vulnerable "
@@ -65,7 +65,7 @@ def explicar(datos: dict, tipo: str = "cartera", estilo: str = "pleno", idioma: 
             model=os.getenv("LLM_MODEL", "claude-haiku-4-5"),
             max_tokens=350,
             messages=[{"role": "user", "content": (
-                "Eres el asistente de planificación de zonas verdes del Ayuntamiento de Madrid (distrito de Tetuán). "
+                "Eres el asistente de planificación de zonas verdes del Ayuntamiento de Madrid (el distrito viene en los datos). "
                 f"Idioma de respuesta: {'español' if idioma == 'es' else 'inglés'}. {ESTILOS[estilo]} "
                 "Usa solo los datos facilitados, no inventes cifras.\n"
                 f"Datos: {datos}")}],

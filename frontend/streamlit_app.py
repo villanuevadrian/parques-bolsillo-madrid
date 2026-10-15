@@ -11,7 +11,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 API = os.getenv("API_URL", "http://localhost:8000")
-st.set_page_config(page_title="Parques bolsillo Tetuán", page_icon="🌳", layout="wide")
+st.set_page_config(page_title="Parques bolsillo Madrid", page_icon="🌳", layout="wide")
 
 # ---------- Accesibilidad ----------
 with st.sidebar:
@@ -32,10 +32,10 @@ if css:
 
 T = {  # textos ES/EN
     "es": {"titulo": "🌳 Parques bolsillo: dónde invertir cada euro para acercar el verde a quien más lo necesita",
-           "tab": ["Ciudad (datos reales)", "Diagnóstico Tetuán", "Optimizador", "Detalle del parque", "Sobre el proyecto"],
+           "tab": ["Ciudad (datos reales)", "Diagnóstico del distrito", "Optimizador", "Detalle del parque", "Sobre el proyecto"],
            "boton": "Calcular la mejor cartera de parques", "leer": "🔊 Leer en voz alta"},
     "en": {"titulo": "🌳 Pocket parks: where to invest every euro to bring green space to those who need it most",
-           "tab": ["City (real data)", "Tetuán diagnosis", "Optimizer", "Park detail", "About"],
+           "tab": ["City (real data)", "District diagnosis", "Optimizer", "Park detail", "About"],
            "boton": "Find the best park portfolio", "leer": "🔊 Read aloud"},
 }[idioma]
 ESTILO = "facil" if facil else "pleno"
@@ -56,7 +56,11 @@ def api(path, metodo="get", **kw):
         r.raise_for_status()
         return r.json()
     except httpx.HTTPStatusError as e:
-        st.warning(f"La API rechazó la petición: {e.response.json().get('detail', e.response.text)}")
+        try:
+            detalle = e.response.json().get("detail", e.response.text)
+        except ValueError:
+            detalle = e.response.text[:200]
+        st.warning(f"La API rechazó la petición ({e.response.status_code}): {detalle}")
         st.stop()
     except httpx.HTTPError as e:
         st.error(f"No conecto con la API en {API} ({type(e).__name__}). ¿Está arrancada? (uvicorn app.main:app)")
@@ -64,8 +68,13 @@ def api(path, metodo="get", **kw):
 
 
 @st.cache_data(ttl=600, show_spinner=False)
-def detalle_parque(pid: int, estilo: str, idioma: str) -> dict:
-    return api(f"/parque/{pid}", params={"estilo": estilo, "idioma": idioma})
+def detalle_parque(pid: int, distrito: str, estilo: str, idioma: str) -> dict:
+    return api(f"/parque/{pid}", params={"distrito": distrito, "estilo": estilo, "idioma": idioma})
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def impacto_ejemplo(distrito: str) -> dict:
+    return api("/optimizar", "post", json={"distrito": distrito, "presupuesto": 500_000})
 
 
 def color_deficit(v: float) -> str:
@@ -77,7 +86,9 @@ def color_deficit(v: float) -> str:
 
 st.title(T["titulo"])
 health = api("/health")
-diag = api("/diagnostico")
+distrito = st.selectbox("📍 Distrito a analizar (cada uno con su mapa, su padrón y sus parques reales)",
+                        health["distritos"], index=health["distritos"].index("Tetuán"))
+diag = api("/diagnostico", params={"distrito": distrito})
 tabs = st.tabs(T["tab"])
 
 # ---------- 1. Ciudad: datos abiertos reales ----------
@@ -107,9 +118,9 @@ with tabs[0]:
                       "prioridad"]].rename(columns={"ranking_vulnerabilidad": "puesto vulnerabilidad (de 131)",
                                                     "m2_hab_distrito": "m² verde/hab del distrito"}), hide_index=True)
     st.caption("Escala: distrito para priorizar → barrio para detectar → manzana de 100 m para decidir dónde intervenir "
-               "(pestañas siguientes, en Tetuán).")
+               "(pestañas siguientes, en el distrito elegido arriba).")
 
-# ---------- 2. Diagnóstico Tetuán ----------
+# ---------- 2. Diagnóstico del distrito ----------
 with tabs[1]:
     k = diag["kpis"]
     c1, c2, c3 = st.columns(3)
@@ -124,6 +135,9 @@ with tabs[1]:
     st.subheader("Mapa de déficit verde (cuadrícula de 100 m)")
     anillo = pd.DataFrame(diag["anillo"]).assign(color="#9e9e9e55", size=20)
     existentes = pd.DataFrame(diag["parques_existentes"])
+    zona = pd.concat([celdas[["lat", "lon"]], anillo[["lat", "lon"]]])
+    existentes = existentes[existentes["lat"].between(zona["lat"].min(), zona["lat"].max())
+                            & existentes["lon"].between(zona["lon"].min(), zona["lon"].max())]  # solo los cercanos
     capa_parques = existentes.rename(columns={"radio_m": "size"}).assign(color="#1b9e3e90")
     st.map(pd.concat([anillo, celdas[["lat", "lon", "color", "size"]], capa_parques[["lat", "lon", "color", "size"]]]),
            latitude="lat", longitude="lon", color="color", size="size")
@@ -154,12 +168,13 @@ with tabs[2]:
 
     if st.button(T["boton"], type="primary"):
         with st.spinner("Optimizando (voraz + recocido simulado)…"):
-            st.session_state["res"] = api("/optimizar", "post", json={
+            st.session_state["res"] = api("/optimizar", "post", json={"distrito": distrito,
                 "presupuesto": presupuesto, "max_plazas": max_plazas, "max_mantenimiento": max_mant,
                 "min_equidad_pct": min_eq, "peso_cobertura": p_cob, "peso_equidad": p_eq, "peso_calor": p_cal,
                 "estilo": ESTILO, "idioma": idioma})
 
     r = st.session_state.get("res")
+    r = r if r and r.get("distrito") == distrito else None  # al cambiar de distrito se descarta el resultado
     if r:
         a, d = r["kpis_antes"], r["kpis_despues"]
         m1, m2, m3, m4 = st.columns(4)
@@ -206,12 +221,13 @@ with tabs[2]:
 # ---------- 4. Detalle del parque ----------
 with tabs[3]:
     r = st.session_state.get("res")
+    r = r if r and r.get("distrito") == distrito else None  # al cambiar de distrito se descarta el resultado
     if not r:
         st.write("Primero calcula una cartera en la pestaña Optimizador.")
     else:
         opciones = {f"#{p['id']} · {p['barrio']} · {p['tipo']}": p["id"] for p in r["seleccion"]}
         pid = opciones[st.selectbox("Parque", list(opciones))]
-        p = detalle_parque(pid, ESTILO, idioma)
+        p = detalle_parque(pid, distrito, ESTILO, idioma)
         c1, c2, c3 = st.columns(3)
         c1.metric("Vecinos nuevos con verde a <300 m", f"{p['nuevos_vecinos_300m']:,}".replace(",", "."))
         c2.metric("Bajada de temperatura cercana", f"{p['bajada_temp_c']} °C",
@@ -229,8 +245,10 @@ with tabs[3]:
 
 # ---------- 5. Sobre el proyecto ----------
 with tabs[4]:
-    st.success("**Impacto:** con 500.000 € en Tetuán, los mayores y niños con un parque a menos de 300 m pasan "
-               "del **22 % al 47 %**, sin superar los límites de aparcamiento, mantenimiento y equidad.")
+    ej = impacto_ejemplo(distrito)
+    st.success(f"**Impacto en {distrito}:** con 500.000 €, los mayores y niños con un parque a menos de 300 m pasan "
+               f"del **{ej['kpis_antes']['pct_vulnerables_300m']} % al {ej['kpis_despues']['pct_vulnerables_300m']} %**, "
+               "respetando los límites de aparcamiento, mantenimiento y equidad. Funciona en los 21 distritos.")
     st.markdown(f"""
 ### Problema
 Madrid quiere acercar el verde a sus vecinos, pero el presupuesto es limitado. Los m² de verde por habitante engañan:
@@ -252,7 +270,8 @@ Motor de decisión que **detecta** el déficit (proximidad + calor + vulnerabili
 
 ### Datos
 **Reales** (datos.madrid.es): zonas verdes por distrito, padrón por barrio 2026, ranking de vulnerabilidad.
-**Sintéticos calibrados**: cuadrícula de Tetuán (la población suma el padrón real de cada barrio), temperatura y solares candidatos.
+**Reales también**: límites oficiales de los 131 barrios y 203 parques y jardines municipales con coordenadas.
+**Sintéticos calibrados**: cuadrícula de 100 m de cada distrito (la población suma el padrón real de cada barrio), temperatura y solares candidatos.
 Siguiente paso: inventario de zonas verdes georreferenciado, temperatura satelital (Copernicus) y suelo municipal disponible.
 
 ### Inclusión
@@ -274,7 +293,9 @@ y reentrenar el modelo: el ciclo de decisión se cierra con datos.
 - **Verde a escala de barrio**: el Ayuntamiento publica la superficie verde por distrito, así que en el ranking de los
   131 barrios cada barrio hereda el m²/hab de su distrito. El inventario de zonas verdes trae direcciones, no coordenadas:
   geocodificarlo es el siguiente paso.
-- **Parques existentes**: posiciones aproximadas de los principales parques (incluidos los de distritos vecinos a <300 m).
+- **Parques existentes**: 203 parques y jardines oficiales con coordenadas, pero sin superficie: radio aproximado
+  (150 m parques, 50 m jardines). No incluye plazas pequeñas, así que el déficit puede estar algo sobrestimado.
+  Siguiente paso: polígonos de OpenStreetMap o Copernicus Urban Atlas.
 - **Sintéticos**: reparto de la población dentro de cada barrio, edades por celda, temperatura y solares candidatos.
   El Random Forest se recalibraría con temperatura satelital real (Landsat/Sentinel) y sensores IoT.
 La versión en inglés cubre títulos, pestañas y explicaciones; el resto del contenido está en español.

@@ -2,7 +2,7 @@
 
 Reto #42 (Salud y Bienestar Urbano): detectar barrios con déficit de zonas verdes y proponer micro-intervenciones.
 **Usuario:** técnico del Ayuntamiento de Madrid que debe decidir y justificar ante el pleno dónde invertir.
-**Caso:** distrito de Tetuán (3,7 m² de verde/hab y alta vulnerabilidad), presupuesto de 500.000 €.
+**Caso:** los **21 distritos de Madrid**, cada uno con su mapa (selector de distrito). Demo principal: Tetuán (3,7 m² de verde/hab y alta vulnerabilidad), presupuesto de 500.000 €.
 
 ## Arranque (2 terminales)
 ```bash
@@ -30,7 +30,7 @@ flowchart LR
 - `data/generate.py` — lee los CSV oficiales de `data/raw/` y genera `distritos.csv` y `barrios.csv` (reales: ranking de los 131 barrios), `celdas.csv` y `candidatos.csv` (sintéticos calibrados).
 - `app/model.py` — Random Forest de temperatura (modelo sustituto), índice de déficit, evaluación de KPIs y restricciones, optimizador voraz + recocido simulado.
 - `app/llm.py` — informe para el pleno y ficha en lectura fácil; sin clave, sin red o con error → plantilla.
-- `app/main.py` — API REST: `/health`, `/ciudad`, `/barrios`, `/diagnostico`, `/optimizar`, `/parque/{id}` (docs en `/docs`).
+- `app/main.py` — API REST: `/health`, `/ciudad`, `/barrios`, `/diagnostico?distrito=`, `/optimizar`, `/parque/{id}?distrito=` (docs en `/docs`). Un modelo por distrito, cargado bajo demanda y en caché.
 - `frontend/streamlit_app.py` — 5 pantallas: Ciudad, Diagnóstico, Optimizador, Detalle del parque, Sobre el proyecto.
 
 ## Datos
@@ -41,8 +41,8 @@ flowchart LR
 | [Ranking de vulnerabilidad 2020](https://datos.madrid.es/dataset/300301-0-ranking-vulnerabilidad) | Real | Prioridad por equidad |
 | Ranking de prioridad de los 131 barrios | Real (cálculo propio) | 60 % vulnerabilidad del barrio + 40 % déficit verde del distrito |
 | [Límites oficiales de barrios](https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas) (TopoJSON) | Real | Silueta de Tetuán, barrio de cada celda y anillo de 300 m |
-| Parques existentes (incluidos los de distritos vecinos a <300 m) | Posición aproximada | Distancia real al verde, sin fronteras administrativas |
-| Cuadrícula de 100 m de Tetuán, temperatura, solares candidatos | Sintético calibrado | Optimización (la población suma el padrón real) |
+| [Principales parques y jardines municipales](https://datos.madrid.es/dataset/200761-0-parques-jardines) (203 con coordenadas) | Real (radio aproximado) | Distancia real al verde, sin fronteras administrativas |
+| Cuadrícula de 100 m de cada distrito, temperatura, solares candidatos | Sintético calibrado | Optimización (la población suma el padrón real) |
 
 ## Métricas
 - **Éxito:** % de mayores y niños con verde a <300 m (OMS Europa), m²/hab, °C de reducción, coste por vecino.
@@ -62,7 +62,8 @@ Distrito para priorizar → **barrio para detectar el déficit** (131 barrios re
 
 ## Limitaciones
 - El verde solo se publica por distrito: en el ranking de barrios cada barrio hereda el m²/hab de su distrito.
-- El inventario de zonas verdes no tiene coordenadas (habría que geocodificarlo); los parques existentes tienen posición aproximada.
+- Los 203 parques oficiales tienen coordenadas pero no superficie (radio aproximado) y no incluyen plazas pequeñas: el déficit puede estar algo sobrestimado. Siguiente paso: polígonos de OpenStreetMap / Copernicus Urban Atlas.
+- En distritos muy grandes (Fuencarral-El Pardo, Moncloa-Aravaca) algún barrio pequeño queda con pocas celdas: la población modelada difiere del padrón en un 1-3 %.
 - Temperatura, reparto de población dentro del barrio y solares candidatos son sintéticos.
 
 ## Accesibilidad

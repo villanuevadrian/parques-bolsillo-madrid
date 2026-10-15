@@ -98,6 +98,18 @@ def test_explicacion_en_ingles(client):
 def test_limites_reales_y_anillo_300m(client):
     d = client.get("/diagnostico").json()
     assert len(d["anillo"]) > 0  # franja de 300 m en distritos vecinos
-    assert any("Tetuán" not in p["nombre"] for p in d["parques_existentes"])  # cuenta verde de otros distritos
+    assert len(d["parques_existentes"]) == 203  # parques oficiales de toda la ciudad, sin fronteras
     assert set(modelo.celdas["barrio"]) == {"Almenara", "Bellas Vistas", "Berruguete", "Castillejos",
                                              "Cuatro Caminos", "Valdeacederas"}
+
+
+def test_otro_distrito_funciona(client):
+    r = client.post("/optimizar", json={**BASE, "distrito": "Puente de Vallecas"}).json()
+    assert r["distrito"] == "Puente de Vallecas"
+    assert r["kpis_despues"]["pct_vulnerables_300m"] > r["kpis_antes"]["pct_vulnerables_300m"]
+    assert client.get("/diagnostico", params={"distrito": "Atlántida"}).status_code == 404
+
+
+@pytest.mark.parametrize("distrito", ["Usera", "Fuencarral-El Pardo", "Centro"])
+def test_diagnostico_todos_los_tipos_de_distrito(client, distrito):
+    assert client.get("/diagnostico", params={"distrito": distrito}).status_code == 200

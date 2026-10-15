@@ -8,6 +8,7 @@
 from math import exp
 from pathlib import Path
 import random
+import unicodedata
 
 import numpy as np
 import pandas as pd
@@ -22,17 +23,23 @@ RADIO_FRESCOR_M = 150  # alcance del efecto de enfriamiento de un parque pequeñ
 CELDA_M = 100
 
 
+def slug(s: str) -> str:
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().replace(" ", "_").replace("-", "_")
+
+
 class Modelo:
-    def __init__(self):
+    def __init__(self, distrito: str = "Tetuán"):
+        self.nombre = distrito
+        carpeta = DATA / "distritos" / slug(distrito)
         self.distritos = pd.read_csv(DATA / "distritos.csv")
         self.barrios = pd.read_csv(DATA / "barrios.csv")  # ranking real de los 131 barrios
-        self.anillo = pd.read_csv(DATA / "anillo.csv")  # 300 m alrededor de Tetuán (otros distritos)
-        self.parques = pd.read_csv(DATA / "parques_existentes.csv")
-        c = pd.read_csv(DATA / "celdas.csv")
+        self.anillo = pd.read_csv(carpeta / "anillo.csv").fillna({"barrio": "fuera del municipio"})  # 300 m alrededor del distrito (otros distritos)
+        self.parques = pd.read_csv(DATA / "parques_existentes.csv")  # 203 parques oficiales
+        c = pd.read_csv(carpeta / "celdas.csv")
         c["densidad"] = c["poblacion"] / c["poblacion"].max()
         c["vulnerables"] = c["poblacion"] * (c["pct_mayores"] + c["pct_menores"])
         self.celdas = c
-        self.cand = pd.read_csv(DATA / "candidatos.csv").set_index("id", drop=False)
+        self.cand = pd.read_csv(carpeta / "candidatos.csv").set_index("id", drop=False)
 
         X, y = c[FEATURES], c["temp_verano"]
         Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0)
@@ -159,6 +166,7 @@ class Modelo:
         if fs < fg:
             s, fs = g, fg
         return {
+            "distrito": self.nombre,
             "seleccion": self.detalle(s),
             "kpis_antes": self.kpis([]), "kpis_despues": self.kpis(s),
             "restricciones": self.restricciones(s, lim),
@@ -173,7 +181,7 @@ class Modelo:
         for i in sel:
             cub[self.cubre[i]] = True
         k = self.cand.loc[sel] if sel else self.cand.iloc[0:0]
-        verde_m2 = float(self.distritos.loc[self.distritos["distrito"] == "Tetuán", "m2_verde"].iloc[0]) + k["m2"].sum()
+        verde_m2 = float(self.distritos.loc[self.distritos["distrito"] == self.nombre, "m2_verde"].iloc[0]) + k["m2"].sum()
         return {
             "pct_vulnerables_300m": round(100 * (c["vulnerables"] * cub).sum() / c["vulnerables"].sum(), 1),
             "pct_poblacion_300m": round(100 * (c["poblacion"] * cub).sum() / c["poblacion"].sum(), 1),

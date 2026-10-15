@@ -13,8 +13,8 @@ ok()  { echo "  ✅ $1"; }
 mal() { echo "  ❌ $1"; FALLOS=$((FALLOS + 1)); }
 
 echo "1) Datos"
-[ -f data/candidatos.csv ] || $PY data/generate.py >/dev/null
-[ -f data/candidatos.csv ] && ok "data/celdas.csv ($(wc -l < data/celdas.csv | tr -d ' ') líneas)" || mal "faltan datos: python data/generate.py"
+[ -f data/distritos/tetuan/candidatos.csv ] || $PY data/generate.py >/dev/null
+[ -f data/distritos/tetuan/candidatos.csv ] && ok "data/distritos: $(ls data/distritos | wc -l | tr -d " ") distritos" || mal "faltan datos: python data/generate.py"
 
 echo "2) API en $API"
 LOG=$(mktemp)

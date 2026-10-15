@@ -1,0 +1,31 @@
+id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
+0,592,7.0,26.0,40.415991,-3.656933,Media Legua,Patio escolar abierto en verano,995,191000,0,4590,231
+1,94,23.0,8.0,40.399774,-3.637998,Fontarrón,Patio escolar abierto en verano,552,146000,0,1893,290
+2,136,26.0,10.0,40.401576,-3.634448,Pavones,Interior de manzana,320,77000,0,1342,66
+3,169,15.0,12.0,40.403378,-3.647466,Fontarrón,Calle a pacificar,573,140000,9,3270,258
+4,563,20.0,24.0,40.414189,-3.641549,Marroquina,Solar municipal vacío,959,223000,0,3265,226
+5,385,11.0,19.0,40.409684,-3.6522,Marroquina,Solar municipal vacío,736,115000,0,3951,290
+6,259,23.0,15.0,40.406081,-3.637998,Marroquina,Interior de manzana,356,101000,0,2018,208
+7,479,36.0,21.0,40.411486,-3.622614,Horcajo,Interior de manzana,336,62000,0,1974,73
+8,184,30.0,12.0,40.403378,-3.629714,Pavones,Solar municipal vacío,891,203000,0,3780,285
+9,553,10.0,24.0,40.414189,-3.653383,Media Legua,Interior de manzana,655,131000,0,3678,237
+10,443,34.0,20.0,40.410585,-3.624981,Horcajo,Interior de manzana,491,83000,0,2172,156
+11,400,26.0,19.0,40.409684,-3.634448,Marroquina,Calle a pacificar,779,145000,12,2583,216
+12,164,33.0,11.0,40.402477,-3.626164,Pavones,Solar municipal vacío,413,78000,0,1931,212
+13,567,24.0,24.0,40.414189,-3.636815,Marroquina,Calle a pacificar,514,85000,8,2007,173
+14,89,18.0,8.0,40.399774,-3.643916,Fontarrón,Interior de manzana,575,172000,0,2560,156
+15,587,27.0,25.0,40.41509,-3.633265,Marroquina,Patio escolar abierto en verano,661,206000,0,3097,356
+16,411,2.0,20.0,40.410585,-3.662851,Media Legua,Solar municipal vacío,711,150000,0,3052,233
+17,245,9.0,15.0,40.406081,-3.654566,Media Legua,Calle a pacificar,650,138000,10,3637,282
+18,568,25.0,24.0,40.414189,-3.635632,Marroquina,Calle a pacificar,390,70000,6,1578,120
+19,233,29.0,14.0,40.40518,-3.630898,Horcajo,Calle a pacificar,678,139000,10,3937,265
+20,348,9.0,18.0,40.408783,-3.654566,Media Legua,Solar municipal vacío,1431,377000,0,5807,530
+21,398,24.0,19.0,40.409684,-3.636815,Marroquina,Interior de manzana,243,73000,0,1113,69
+22,53,17.0,6.0,40.397973,-3.645099,Fontarrón,Interior de manzana,311,88000,0,1858,176
+23,452,9.0,21.0,40.411486,-3.654566,Media Legua,Solar municipal vacío,723,154000,0,2192,146
+24,410,36.0,19.0,40.409684,-3.622614,Horcajo,Calle a pacificar,737,191000,11,2910,310
+25,253,17.0,15.0,40.406081,-3.645099,Vinateros,Calle a pacificar,706,183000,11,3604,158
+26,290,20.0,16.0,40.406982,-3.641549,Vinateros,Solar municipal vacío,675,205000,0,2841,247
+27,231,27.0,14.0,40.40518,-3.633265,Horcajo,Calle a pacificar,360,93000,5,1374,167
+28,21,30.0,3.0,40.39527,-3.629714,Pavones,Calle a pacificar,792,189000,12,4509,264
+29,478,35.0,21.0,40.411486,-3.623797,Horcajo,Calle a pacificar,518,144000,8,3044,168
