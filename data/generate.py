@@ -116,7 +116,7 @@ def area_m2(coords):
     return abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))) / 2
 
 
-osm = []
+osm, GEOM = [], []
 for e in json.loads((RAW / "osm_verde.json").read_text(encoding="utf-8"))["elements"]:
     t = e.get("tags", {})
     if t.get("leisure") == "garden" and "name" not in t:
@@ -134,6 +134,7 @@ for e in json.loads((RAW / "osm_verde.json").read_text(encoding="utf-8"))["eleme
         continue
     osm.append({"nombre": t.get("name", "Zona verde sin nombre"), "lon": todos[:, 0].mean(), "lat": todos[:, 1].mean(),
                 "m2": round(m2), "radio_m": round(float(np.sqrt(m2 / np.pi)), 1), "bolsillo": m2 < 5000})
+    GEOM.append([np.round(a[:: max(1, len(a) // 60)], 5).tolist() for a in anillos])  # contorno simplificado
 OSM = pd.DataFrame(osm)
 OSM["cod_barrio"] = 0
 for _, cb, _, poly in POLIS:
@@ -206,6 +207,20 @@ def generar_distrito(cod: int, nombre: str):
     dist_dir.mkdir(parents=True, exist_ok=True)
     pd.DataFrame({"lat": g_lat[en_anillo].round(6), "lon": g_lon[en_anillo].round(6),
                   "barrio": nom_b[en_anillo]}).to_csv(dist_dir / "anillo.csv", index=False)
+
+    # GeoJSON para el mapa: contornos reales de zonas verdes (OSM) y límites oficiales de los barrios del distrito
+    la_min, la_max = g_lat[en_anillo | mio].min(), g_lat[en_anillo | mio].max()
+    lo_min, lo_max = g_lon[en_anillo | mio].min(), g_lon[en_anillo | mio].max()
+    cerca = OSM["lat"].between(la_min, la_max) & OSM["lon"].between(lo_min, lo_max)
+    verde_geo = {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": GEOM[i]},
+         "properties": {"nombre": OSM.at[i, "nombre"], "m2": int(OSM.at[i, "m2"]), "bolsillo": bool(OSM.at[i, "bolsillo"])}}
+        for i in OSM.index[cerca]]}
+    barrios_geo = {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [np.round(poly, 5).tolist()]},
+         "properties": {"nombre": nb}} for cd, cb, nb, poly in POLIS if cd == cod]}
+    (dist_dir / "verde_geo.json").write_text(json.dumps(verde_geo, ensure_ascii=False), encoding="utf-8")
+    (dist_dir / "barrios_geo.json").write_text(json.dumps(barrios_geo, ensure_ascii=False), encoding="utf-8")
 
     bar = b[b["cod_distrito"] == cod][["cod_barrio", "barrio", "poblacion", "ranking_vulnerabilidad"]].copy()
     bar["vulnerabilidad"] = (1 - (bar["ranking_vulnerabilidad"] - 1) / 130).round(3)

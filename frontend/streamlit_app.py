@@ -7,6 +7,7 @@ import os
 
 import httpx
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -65,6 +66,28 @@ def api(path, metodo="get", **kw):
     except httpx.HTTPError as e:
         st.error(f"No conecto con la API en {API} ({type(e).__name__}). ¿Está arrancada? (uvicorn app.main:app)")
         st.stop()
+
+
+def rgba(hex_color: str) -> list[int]:
+    h = hex_color.lstrip("#")
+    return [int(h[i:i + 2], 16) for i in (0, 2, 4, 6)] if len(h) == 8 else [int(h[i:i + 2], 16) for i in (0, 2, 4)] + [255]
+
+
+def mapa(celdas: pd.DataFrame, puntos: list[pdk.Layer], diag: dict):
+    """Mapa con contornos reales: zonas verdes (OpenStreetMap) y límites oficiales de los barrios."""
+    capas = [
+        pdk.Layer("GeoJsonLayer", diag["verde_geo"], stroked=True, filled=True, pickable=True,
+                  get_fill_color="properties.bolsillo ? [166, 219, 160, 170] : [27, 158, 62, 150]",
+                  get_line_color=[27, 120, 55, 255], line_width_min_pixels=1),
+        *puntos,
+        pdk.Layer("GeoJsonLayer", diag["barrios_geo"], stroked=True, filled=False, pickable=False,
+                  get_line_color=[255, 255, 255, 220], line_width_min_pixels=2),
+    ]
+    span = max(celdas["lat"].max() - celdas["lat"].min(), celdas["lon"].max() - celdas["lon"].min())
+    vista = pdk.ViewState(latitude=celdas["lat"].mean(), longitude=celdas["lon"].mean(),
+                          zoom=13.6 if span < 0.04 else 12.8 if span < 0.08 else 11.8)
+    st.pydeck_chart(pdk.Deck(layers=capas, initial_view_state=vista, map_style=None,
+                             tooltip={"text": "{nombre}"}), height=520)
 
 
 @st.cache_data(ttl=600, show_spinner=False)
@@ -135,17 +158,19 @@ with tabs[1]:
     celdas["color"] = rel.map(color_deficit)
     celdas["size"] = 10 + 45 * rel  # más déficit = punto más grande
     st.subheader("Mapa de déficit verde (cuadrícula de 100 m)")
-    anillo = pd.DataFrame(diag["anillo"]).assign(color="#9e9e9e55", size=20)
-    existentes = pd.DataFrame(diag["parques_existentes"])
-    existentes["radio_m"] = existentes["radio_m"].clip(lower=25)  # que los más pequeños se vean
-    existentes["color"] = existentes["bolsillo"].map({True: "#a6dba0c0", False: "#1b9e3e90"})
-    capa_parques = existentes.rename(columns={"radio_m": "size"})
-    st.map(pd.concat([anillo, celdas[["lat", "lon", "color", "size"]], capa_parques[["lat", "lon", "color", "size"]]]),
-           latitude="lat", longitude="lon", color="color", size="size")
+    anillo = pd.DataFrame(diag["anillo"])
+    celdas["rgba"] = celdas["color"].map(rgba)
+    celdas["nombre"] = celdas["barrio"] + " · déficit " + celdas["indice_deficit"].astype(str)
+    mapa(celdas, [
+        pdk.Layer("ScatterplotLayer", anillo, get_position="[lon, lat]", get_radius=12,
+                  get_fill_color=[158, 158, 158, 90]),
+        pdk.Layer("ScatterplotLayer", celdas, get_position="[lon, lat]", get_radius="size",
+                  get_fill_color="rgba", pickable=True),
+    ], diag)
     barrios = pd.DataFrame(diag["barrios"])
     st.caption(f"Descripción del mapa: naranja y punto grande = mayor déficit; azul y punto pequeño = menor déficit (lejos de zonas verdes, más calor y más vulnerabilidad). "
-               f"Puntos grises: franja de 300 m en distritos vecinos; círculos verde oscuro: espacios verdes de 0,5 ha o más (criterio OMS); verde claro: parques "
-               f"bolsillo existentes (<0,5 ha). Cuentan también los de otros distritos, porque para un vecino cuenta la distancia real y no el límite administrativo. "
+               f"Puntos grises: franja de 300 m en distritos vecinos; polígonos verde oscuro: contorno real de los espacios verdes (OpenStreetMap); "
+               f"verde claro: parques bolsillo existentes (<0,5 ha); líneas blancas: límites oficiales de los barrios. Cuentan también los de otros distritos, porque para un vecino cuenta la distancia real y no el límite administrativo. "
                f"El barrio con más déficit es {barrios.iloc[0]['barrio']}; el {100 - k['pct_poblacion_300m']:.0f} % de "
                "los vecinos no tiene un espacio verde a menos de 300 m.")
     st.dataframe(barrios.rename(columns={"pct_sin_verde_300m": "% sin verde a 300 m",
@@ -195,12 +220,16 @@ with tabs[2]:
 
         sel = pd.DataFrame(r["seleccion"])
         st.subheader("Cartera propuesta")
-        base = pd.concat([celdas[["lat", "lon"]].assign(color="#9e9e9e40", size=30),
-                          anillo[["lat", "lon"]].assign(color="#9e9e9e20", size=20)])
-        parques = sel[["lat", "lon"]].assign(color="#1b9e3ef0", size=300)  # radio de 300 m
-        st.map(pd.concat([base, parques]), latitude="lat", longitude="lon", color="color", size="size")
-        st.caption(f"Descripción del mapa: los {len(sel)} círculos verdes son los parques propuestos con su radio de "
-                   f"300 m; están en {', '.join(sorted(sel['barrio'].unique()))}.")
+        sel["nombre"] = "Propuesta #" + sel["id"].astype(str) + " · " + sel["tipo"] + " · " + sel["barrio"]
+        mapa(celdas, [
+            pdk.Layer("ScatterplotLayer", sel, get_position="[lon, lat]", get_radius=300,  # radio OMS de 300 m
+                      get_fill_color=[255, 191, 0, 45], get_line_color=[255, 191, 0, 255], stroked=True,
+                      line_width_min_pixels=2, pickable=True),
+            pdk.Layer("ScatterplotLayer", sel, get_position="[lon, lat]", get_radius=40,
+                      get_fill_color=[255, 191, 0, 255], pickable=True),
+        ], diag)
+        st.caption(f"Descripción del mapa: los {len(sel)} puntos amarillos son los parques bolsillo propuestos y "
+                   f"los círculos, su radio de 300 m (sobre el verde real y los límites de barrio); están en {', '.join(sorted(sel['barrio'].unique()))}.")
         st.dataframe(sel[["id", "barrio", "tipo", "m2", "coste", "nuevos_vulnerables_300m", "bajada_temp_c",
                           "coste_por_vecino"]].rename(columns={
                               "nuevos_vulnerables_300m": "mayores y niños nuevos a <300 m",

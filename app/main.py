@@ -60,7 +60,8 @@ def diagnostico(distrito: str = "Tetuán"):
     modelo = get_modelo(distrito)
     return {"distrito": distrito, "mae_temperatura": modelo.mae,"celdas": modelo.diagnostico(), "barrios": modelo.resumen_barrios(),
             "kpis": modelo.kpis([]), "importancias": modelo.importancias(),
-            "anillo": modelo.anillo.to_dict("records"), "parques_existentes": modelo.parques.to_dict("records")}
+            "anillo": modelo.anillo.to_dict("records"), "parques_existentes": modelo.parques.to_dict("records"),
+            "verde_geo": modelo.verde_geo, "barrios_geo": modelo.barrios_geo}
 
 
 @app.post("/optimizar")

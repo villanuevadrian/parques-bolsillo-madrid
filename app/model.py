@@ -7,6 +7,7 @@
 """
 from math import exp
 from pathlib import Path
+import json
 import random
 import unicodedata
 
@@ -33,6 +34,8 @@ class Modelo:
         carpeta = DATA / "distritos" / slug(distrito)
         self.distritos = pd.read_csv(DATA / "distritos.csv")
         self.barrios = pd.read_csv(DATA / "barrios.csv")  # ranking real de los 131 barrios
+        self.verde_geo = json.loads((carpeta / "verde_geo.json").read_text(encoding="utf-8"))
+        self.barrios_geo = json.loads((carpeta / "barrios_geo.json").read_text(encoding="utf-8"))
         self.anillo = pd.read_csv(carpeta / "anillo.csv").fillna({"barrio": "fuera del municipio"})  # 300 m alrededor del distrito (otros distritos)
         verde = pd.concat([pd.read_csv(DATA / "verde_osm.csv").assign(fuente="OpenStreetMap"),
                            pd.read_csv(DATA / "parques_existentes.csv").assign(fuente="Ayuntamiento", bolsillo=False)])
