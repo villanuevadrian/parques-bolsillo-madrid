@@ -205,7 +205,9 @@ class Modelo:
             A[j, n + j] = 1
         A[m, :n] = self.cand.loc[ids, "coste"].to_numpy()   # Σ coste_i x_i <= presupuesto
         res = milp(c, constraints=LinearConstraint(A.tocsr(), -np.inf, np.r_[np.zeros(m), presupuesto]),
-                   integrality=np.r_[np.ones(n), np.zeros(m)], bounds=Bounds(0, 1))
+                   integrality=np.r_[np.ones(n), np.zeros(m)], bounds=Bounds(0, 1), options={"time_limit": 10})
+        if res.x is None or res.fun is None:
+            return {"presupuesto": presupuesto, "estado_solver": f"sin solución en 10 s ({res.message})"}
         optimo = float(-res.fun)
         sel_opt = [ids[k] for k in range(n) if res.x[k] > 0.5]
 

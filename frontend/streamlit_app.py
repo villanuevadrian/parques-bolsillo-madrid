@@ -117,6 +117,10 @@ health = api("/health")
 distrito = st.selectbox("📍 Distrito a analizar (cada uno con su mapa, su padrón y sus parques reales)",
                         health["distritos"], index=health["distritos"].index("Tetuán"))
 diag = api("/diagnostico", params={"distrito": distrito})
+_ej = impacto_ejemplo(distrito)
+st.success(f"**{distrito}:** con 500.000 € en parques bolsillo, los mayores y niños con un espacio verde a menos de "
+           f"300 m pasan del **{_ej['kpis_antes']['pct_vulnerables_300m']} % al {_ej['kpis_despues']['pct_vulnerables_300m']} %** "
+           "(criterio OMS), respetando aparcamiento, mantenimiento y equidad.")
 tabs = st.tabs(T["tab"])
 
 # ---------- 1. Ciudad: datos abiertos reales ----------
@@ -156,7 +160,8 @@ with tabs[1]:
     c1, c2, c3 = st.columns(3)
     c1.metric("Mayores y niños con verde a <300 m", f"{k['pct_vulnerables_300m']} %")
     c2.metric("Población con verde a <300 m", f"{k['pct_poblacion_300m']} %")
-    c3.metric("m² verde por habitante", k["m2_verde_hab"], help="Referencia habitual (OMS): mínimo 9 m²/hab")
+    c3.metric("m² verde por habitante", k["m2_verde_hab"], help="9 m²/hab es una referencia citada habitualmente, no una norma oficial de la OMS. "
+                     "El criterio OMS que usamos es: espacio verde de ≥0,5 ha a menos de 300 m.")
     celdas = pd.DataFrame(diag["celdas"])
     rel = (celdas["indice_deficit"] - celdas["indice_deficit"].min()) / (
         celdas["indice_deficit"].max() - celdas["indice_deficit"].min())  # relativo al distrito
@@ -251,17 +256,23 @@ with tabs[2]:
         st.caption(f"Fuente de la explicación: {r['explicacion']['fuente']}")
         leer_en_voz_alta(r["explicacion"]["texto"], "leer_cartera")
 
-        with st.expander("🔬 Validación del algoritmo frente al óptimo exacto"):
+        pres_cartera = int(r["restricciones"]["presupuesto"]["limite"])  # el de la cartera mostrada, no el del slider
+        if st.toggle("🔬 Validar el algoritmo frente al óptimo exacto"):
             with st.spinner("Resolviendo el óptimo exacto (programación lineal entera)…"):
-                v = validacion(distrito, presupuesto)
-            v1, v2, v3 = st.columns(3)
-            v1.metric("Recocido simulado", f"{v['recocido_pct_optimo']} % del óptimo")
-            v2.metric("Voraz", f"{v['voraz_pct_optimo']} % del óptimo")
-            v3.metric("Frente a elegir al azar", f"{v['veces_mejor_que_azar']}× mejor")
-            st.caption(f"Objetivo de cobertura pura (mayores y niños que ganan verde a <300 m) con {presupuesto:,} €. "
-                       f"Óptimo exacto: {v['optimo_exacto']:,} personas, calculado con programación lineal entera "
-                       f"(solver HiGHS: {v['estado_solver'].split('(')[-1].rstrip(')')}). Azar: media de 1.000 carteras "
-                       f"aleatorias del mismo presupuesto ({v['azar_medio']:,} personas).".replace(",", "."))
+                v = validacion(distrito, pres_cartera)
+            if "optimo_exacto" not in v:
+                st.warning(f"No se pudo validar: {v['estado_solver']}")
+            elif v["optimo_exacto"] == 0:
+                st.info("Con este presupuesto ningún parque añade cobertura nueva: no hay nada que optimizar.")
+            else:
+                v1, v2, v3 = st.columns(3)
+                v1.metric("Recocido simulado", f"{v['recocido_pct_optimo']} % del óptimo")
+                v2.metric("Voraz", f"{v['voraz_pct_optimo']} % del óptimo")
+                v3.metric("Frente a elegir al azar", f"{v['veces_mejor_que_azar']}× mejor")
+                st.caption(f"Objetivo de cobertura pura (mayores y niños que ganan verde a <300 m) con {pres_cartera:,} €. "
+                           f"Óptimo exacto: {v['optimo_exacto']:,} personas, calculado con programación lineal entera "
+                           f"(solver HiGHS: {v['estado_solver'].split('(')[-1].rstrip(')')}). Azar: media de 1.000 "
+                           f"carteras aleatorias del mismo presupuesto ({v['azar_medio']:,} personas).".replace(",", "."))
     else:
         st.caption("Ajusta presupuesto, restricciones y prioridades y pulsa el botón.")
 
