@@ -217,6 +217,9 @@ def color_deficit(v: float) -> str:
 # ---------- Sobre el proyecto (sección independiente: no depende del distrito) ----------
 def sobre_el_proyecto():
     st.header("ℹ️ Sobre el proyecto")
+    st.caption("**Autor:** [villanuevadrian](https://github.com/villanuevadrian) · Universidad Carlos III de Madrid (UC3M) · Programa **Líderes Digitales "
+               "Universitarios** (Cátedras Telefónica) · **Reto #42**, pilar Salud y Bienestar Urbano: «Diseña una app que "
+               "detecte barrios con déficit de zonas verdes y proponga micro-intervenciones (parques bolsillo)».")
     st.info("**En una frase:** un motor de decisión que le dice al técnico municipal **qué barrios** tienen déficit de "
             "verde, **dónde** poner cada parque bolsillo y **qué construir** en él para que más mayores y niños tengan "
             "verde a menos de 300 m, con el presupuesto que hay y justificándolo ante el pleno.")

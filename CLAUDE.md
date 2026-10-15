@@ -1,11 +1,11 @@
 # Contexto
-Prueba técnica de 2 horas (Líderes Digitales, Telefónica). Objetivo: MVP funcional que puntúe en
+Prueba técnica de 2 horas (Líderes Digitales Universitarios, Cátedras Telefónica). Objetivo: MVP funcional que puntúe en
 innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/escalabilidad (15).
 
 # Proyecto
 - Reto #42: detectar barrios con déficit verde y proponer parques bolsillo. Usuario: técnico del Ayuntamiento.
-- `data/generate.py` → datos reales (data/raw, datos.madrid.es) + cuadrícula sintética de Tetuán.
-- `app/model.py` → RandomForest de temperatura + índice de déficit + optimizador (voraz + recocido simulado).
+- `data/generate.py` → datos reales (data/raw, datos.madrid.es) + OpenStreetMap + cuadrícula sintética de cada distrito.
+- `app/model.py` → RandomForest de temperatura + déficit OMS + optimizador (voraz + recocido simulado, validado con MILP) + diseño de cada parque.
 - `app/llm.py` → explicación con LLM, SIEMPRE con fallback (la demo no puede caerse).
 - `app/main.py` → FastAPI. `frontend/streamlit_app.py` → UI accesible + pestaña "Sobre el proyecto".
 - Arranque: `python data/generate.py`, `uvicorn app.main:app --reload`, `streamlit run frontend/streamlit_app.py`.
@@ -28,7 +28,7 @@ innovación técnica (20), prueba de concepto (15) y sostenibilidad/inclusión/e
 - Usa siempre `.venv` (Python 3.12, ya instalado). No reinstales ni recrees el venv.
 - Si se aprueba una dependencia nueva: `.venv/bin/pip install X` y añádela a `requirements.txt` en el mismo commit.
 - Tests: `pytest -q` significa `.venv/bin/python -m pytest -q` (`tests/test_api.py`, sin red).
-- Prueba de punta a punta: `./scripts/smoke.sh`. Al cambiar el dominio, actualiza su `PREDICT_BODY` a los campos nuevos de `/predict`.
+- Prueba de punta a punta: `./scripts/smoke.sh`. Al cambiar el dominio, actualiza su `PREDICT_BODY` a los campos de `/optimizar`.
 - Ver la app: `.claude/launch.json` (API :8000, Streamlit :8501) en el panel del navegador.
 
 # Cierre (antes del último commit) — no olvidar

@@ -1,53 +1,84 @@
-# Parques bolsillo — motor de decisión para acercar el verde a quien más lo necesita
+# 🌳 Parques bolsillo Madrid — dónde invertir cada euro para acercar el verde a quien más lo necesita
 
-Reto #42 (Salud y Bienestar Urbano): detectar barrios con déficit de zonas verdes y proponer micro-intervenciones.
-**Usuario:** técnico del Ayuntamiento de Madrid que debe decidir y justificar ante el pleno dónde invertir.
-**Caso:** los **21 distritos de Madrid**, cada uno con su mapa (selector de distrito). Demo principal: Tetuán (3,7 m² de verde/hab y alta vulnerabilidad), presupuesto de 500.000 €.
+> Motor de decisión para técnicos municipales: **detecta** los barrios con déficit de zonas verdes, **decide dónde** poner
+> cada parque bolsillo y **qué construir** en él, y lo **justifica** ante el pleno. Datos abiertos reales de Madrid,
+> optimización validada frente al óptimo exacto e IA generativa.
 
-## Arranque (2 terminales)
-```bash
-source .venv/bin/activate
-python data/generate.py                      # prepara datos reales + sintéticos calibrados
-uvicorn app.main:app --reload                # API -> http://localhost:8000/docs
-streamlit run frontend/streamlit_app.py      # (otra terminal) UI -> http://localhost:8501
-```
-Instalación limpia: `python -m venv .venv && .venv/bin/pip install -r requirements.lock.txt` (versiones exactas probadas).
-Opcional: copia `.env.example` a `.env` y pon tu `ANTHROPIC_API_KEY`. Sin clave funciona igual (textos por plantilla).
+- **Autor:** [villanuevadrian](https://github.com/villanuevadrian), en representación de la **Universidad Carlos III de Madrid (UC3M)**
+- **Contexto:** prueba técnica de 2 horas del programa **Líderes Digitales Universitarios** (Cátedras Telefónica)
+- **Reto #42 · Pilar Salud y Bienestar Urbano:** *«Diseña una app que detecte barrios con déficit de zonas verdes y proponga
+  micro-intervenciones (parques bolsillo)»*
+
+![Diagnóstico de Tetuán: déficit de verde por manzana sobre los límites oficiales de barrio y los contornos reales de las zonas verdes](docs/img/02_diagnostico.jpg)
+
+## Resultados clave
+- **Tetuán, 500.000 €:** los mayores y niños con un espacio verde a menos de 300 m (criterio OMS) pasan del **57 % al 82 %**,
+  cumpliendo los límites de aparcamiento, mantenimiento y equidad.
+- **Validado:** la metaheurística alcanza el **98,8–100 % del óptimo exacto** (programación lineal entera) y es
+  **2,7–9 veces mejor** que repartir parques al azar.
+- **Escala:** funciona en los **21 distritos** y prioriza los **131 barrios** de Madrid con datos oficiales.
+
+## Qué hace: tres decisiones encadenadas
+| # | Decisión | Cómo |
+|---|---|---|
+| 1 | **Qué barrios** tienen déficit | Verde real por barrio (OpenStreetMap) + ranking oficial de vulnerabilidad; mapa por distrito con el criterio OMS (≥0,5 ha a 300 m) |
+| 2 | **Dónde** poner cada parque bolsillo | Cobertura máxima con presupuesto y restricciones: voraz + recocido simulado, validado con el óptimo exacto (HiGHS) |
+| 3 | **Qué construir** en cada uno | Mochila exacta sobre 8 micro-intervenciones (sombra, bancos, juegos, fuente, jardín de lluvia…) según quién vive alrededor |
+
+Además: curva de escenarios de presupuesto (rendimientos decrecientes), **informe para el pleno** descargable (HTML
+imprimible a PDF) y textos redactados por **IA generativa** (Claude) con respaldo por plantilla: el servicio nunca se cae.
+
+| Ciudad: detección | Optimizador | Cartera propuesta | Qué construir |
+|---|---|---|---|
+| ![Ciudad](docs/img/01_ciudad.jpg) | ![Optimizador](docs/img/03_optimizador.jpg) | ![Cartera](docs/img/04_cartera_mapa.jpg) | ![Diseño](docs/img/05_detalle_diseno.jpg) |
+
+- **Usuario:** técnico municipal (Junta de Distrito / Medio Ambiente). Los vecinos reciben la misma propuesta en lectura fácil.
+- **Accesibilidad:** lectura fácil, texto grande, alto contraste, modo oscuro, ES/EN (beta), lectura en voz alta,
+  descripción textual de mapas y gráficos y estados con icono **y** texto.
+- **Negocio:** SaaS B2G para ayuntamientos; sensores IoT para medir el impacto real tras construir y recalibrar el modelo.
 
 ## Arquitectura
 ```mermaid
 flowchart LR
-    R[(Datos abiertos Madrid<br/>zonas verdes, padrón,<br/>vulnerabilidad)] --> G[generate.py<br/>+ cuadrícula Tetuán<br/>sintética calibrada]
-    I[(Sensores IoT<br/>temperatura, afluencia<br/>roadmap)] -.-> G
-    G --> M[Modelo<br/>RandomForest temperatura<br/>+ índice de déficit]
-    M --> O[Optimizador<br/>voraz + recocido simulado<br/>con restricciones]
-    O --> A[API REST<br/>FastAPI]
+    R[(Datos abiertos Madrid<br/>padrón, vulnerabilidad,<br/>límites, parques)] --> G[generate.py<br/>cuadrícula de 100 m<br/>por distrito]
+    O[(OpenStreetMap<br/>3.668 zonas verdes<br/>con contorno)] --> G
+    I[(Sensores IoT<br/>roadmap)] -.-> G
+    G --> M[Modelo<br/>déficit OMS + Random Forest<br/>de temperatura]
+    M --> P[Optimizador<br/>voraz + recocido simulado]
+    P --> V[Validación<br/>óptimo exacto MILP]
+    P --> D[Diseño de cada parque<br/>mochila exacta]
+    P --> A[API REST<br/>FastAPI]
+    D --> A
     A --> F[Frontend accesible<br/>Streamlit]
-    A --> C[Otros clientes<br/>Decide Madrid, paneles,<br/>app móvil]
-    A <--> L[LLM<br/>informe pleno / lectura fácil]
-    L -. fallback si falla .-> P[Plantilla]
+    A --> C[Otros clientes<br/>Decide Madrid, paneles]
+    A <--> L[LLM Claude<br/>informe / lectura fácil]
+    L -. fallback .-> T[Plantilla]
 ```
-- `data/generate.py` — lee los CSV oficiales de `data/raw/` y genera `distritos.csv` y `barrios.csv` (reales: ranking de los 131 barrios), `celdas.csv` y `candidatos.csv` (sintéticos calibrados).
-- `app/model.py` — Random Forest de temperatura (modelo sustituto), índice de déficit, evaluación de KPIs y restricciones, optimizador voraz + recocido simulado.
-- `app/llm.py` — informe para el pleno y ficha en lectura fácil; sin clave, sin red o con error → plantilla.
-- `app/main.py` — API REST: `/health`, `/ciudad`, `/barrios`, `/diagnostico?distrito=`, `/optimizar`, `/parque/{id}?distrito=` (docs en `/docs`). Un modelo por distrito, cargado bajo demanda y en caché.
-- `frontend/streamlit_app.py` — 5 pantallas: Ciudad, Diagnóstico, Optimizador, Detalle del parque, Sobre el proyecto.
+| Módulo | Qué hace |
+|---|---|
+| `data/generate.py` | Lee los datos oficiales (`data/raw/`) y OpenStreetMap; genera el ranking de barrios y la cuadrícula de cada distrito |
+| `app/model.py` | Déficit, Random Forest de temperatura, optimizador, validación MILP y diseño de cada parque |
+| `app/llm.py` | Informe para el pleno y lectura fácil con Claude; sin clave o con error → plantilla |
+| `app/main.py` | API REST: `/ciudad`, `/barrios`, `/diagnostico`, `/optimizar`, `/escenarios`, `/validacion`, `/parque/{id}` |
+| `frontend/streamlit_app.py` | Herramienta (Ciudad, Diagnóstico, Optimizador, Detalle) y sección «Sobre el proyecto» |
 
-## Datos
-| Fuente | Tipo | Uso |
+## Puesta en marcha
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.lock.txt           # versiones exactas probadas
+uvicorn app.main:app --reload                  # API -> http://localhost:8000/docs
+streamlit run frontend/streamlit_app.py        # (otra terminal) app -> http://localhost:8501
+```
+Los datos procesados ya vienen en el repositorio; `python data/generate.py` los regenera desde `data/raw/`.
+Opcional: copia `.env.example` a `.env` y añade tu `ANTHROPIC_API_KEY` para que los textos los redacte Claude.
+Sin clave funciona igual (textos por plantilla).
+
+## Datos y atribución
+| Fuente | Uso | Licencia / atribución |
 |---|---|---|
-| [Superficie de zonas verdes por distrito 2025](https://datos.madrid.es/dataset/300266-0-arbolado-superficie) | Real | m² de verde por distrito |
-| [Población por distrito y barrio, 1-ene-2026](https://datos.madrid.es/dataset/300557-0-poblacion-distrito-barrio) | Real | m²/hab y población de cada barrio de Tetuán |
-| [Ranking de vulnerabilidad 2020](https://datos.madrid.es/dataset/300301-0-ranking-vulnerabilidad) | Real | Prioridad por equidad |
-| Zonas verdes de [OpenStreetMap](https://www.openstreetmap.org) (Overpass, `leisure=park|garden`): 3.668 con contorno, 2.202 de tamaño bolsillo | Real (colaborativo) | Superficie verde **por barrio**, parques bolsillo existentes y distancias |
-| Ranking de prioridad de los 131 barrios | Real (cálculo propio) | 60 % vulnerabilidad del barrio + 40 % déficit de verde del barrio |
-| [Límites oficiales de barrios](https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas) (TopoJSON) | Real | Silueta de Tetuán, barrio de cada celda y anillo de 300 m |
-| [Principales parques y jardines municipales](https://datos.madrid.es/dataset/200761-0-parques-jardines) (203 con coordenadas) | Real (radio aproximado) | Distancia real al verde, sin fronteras administrativas |
-| Cuadrícula de 100 m de cada distrito, temperatura, solares candidatos | Sintético calibrado | Optimización (la población suma el padrón real) |
-
-## Métricas
-- **Éxito:** % de mayores y niños con un espacio verde de ≥0,5 ha a <300 m (OMS Europa) o con un parque bolsillo nuevo, m²/hab, °C de reducción, coste por vecino.
-- **Restricción:** presupuesto (dura), plazas de aparcamiento, mantenimiento anual, % de inversión en barrios vulnerables.
+| [Ayuntamiento de Madrid — datos.madrid.es](https://datos.madrid.es): población por barrio (1-ene-2026), ranking de vulnerabilidad (2020), superficie verde por distrito (2025), principales parques y jardines, límites de barrios | Padrón, equidad, verde oficial, geometría | Reutilización con cita de la fuente: *Ayuntamiento de Madrid* |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) (`leisure=park\|garden`, vía Overpass) | Contorno y superficie de 3.668 zonas verdes | © OpenStreetMap contributors, [ODbL](https://opendatacommons.org/licenses/odbl/) |
+| Sintéticos calibrados | Reparto de población dentro de cada barrio, edades, temperatura, solares candidatos y costes | Generados en `data/generate.py` |
 
 ## Metodología y cálculos (cómo se obtiene cada número)
 | Cálculo | Fórmula | Justificación / fuente |
@@ -63,23 +94,31 @@ flowchart LR
 | **Qué construir** | por parque, mochila exacta sobre 8 elementos (2⁸ = 256 combinaciones): max Σ utilidad sujeto a m² ≤ 85 % del solar y coste ≤ 35 % del presupuesto del parque; utilidad = Σ peso × beneficio (mayores, niños, calor, agua) | Pesos = proporción real de mayores y niños a <300 m e índice de calor de la zona; agua con peso fijo 0,3. Huella, coste y beneficio de cada elemento: hipótesis de orden de magnitud |
 | **Coste por vecino** | coste del parque ÷ vecinos que ganan verde a 300 m | Costes de urbanización 150–320 €/m² y mantenimiento 3–6 €/m²·año: hipótesis de orden de magnitud |
 
+## Limitaciones
+- **Solares candidatos, costes y temperatura son sintéticos** (prueba de concepto). En producción: inventario de suelo
+  municipal, catastro y temperatura satelital (Landsat/Sentinel).
+- **OpenStreetMap es colaborativo**: puede faltar o sobrar alguna zona; se descartan jardines sin nombre (suelen ser patios privados).
+- Los parques municipales no traen contorno (radio aproximado). **Distancias en línea recta**, no a pie.
+- Ranking de vulnerabilidad de **2020** (último publicado). En distritos sin barrios vulnerables la restricción de equidad no aplica.
+- Los textos de la IA pueden contener erratas: se indica su fuente y deben revisarse antes de presentarlos.
+
 ## Tests
 ```bash
-.venv/bin/python -m pytest -q     # tests de API (TestClient, sin red)
-./scripts/smoke.sh                # punta a punta: API real + Streamlit
+python -m pytest -q          # 26 tests: API, auditoría de cálculos y validación frente al óptimo exacto (sin red)
+./scripts/smoke.sh           # punta a punta: API real + Streamlit
 ```
-`tests/test_api.py` cubre: salud de la API; los 21 distritos reales; detección de los 131 barrios; población calibrada con el padrón; el optimizador
-respeta el presupuesto, mejora los KPIs y el recocido nunca empeora al voraz; más presupuesto no empeora; los parques
-enfrían; fallback del LLM sin API key; detalle en lectura fácil; validación de entradas (422/404).
+Incluyen tests de **auditoría** que recalculan de forma independiente que cada celda cae en su barrio oficial, que la
+población coincide con el padrón y que la cobertura del optimizador es correcta.
 
-## Detección a tres escalas
-Distrito para priorizar → **barrio para detectar el déficit** (131 barrios reales) → manzana de 100 m para decidir dónde intervenir.
+## Cómo se desarrolló
+Construido en 2 horas con **Claude Code** como asistente de programación, con un flujo de ingeniería de software ligera:
+1. **Plan antes de código** y aprobación de cada decisión (reto, usuario, métricas de éxito y de restricción).
+2. **Pasos pequeños con tests** después de cada cambio (`pytest` + `scripts/smoke.sh`) y un commit por paso.
+3. **Agente revisor independiente** (`.claude/agents/jurado.md`) que evalúa la app con la rúbrica del jurado sin haber
+   visto el desarrollo; se aplicaron sus mejoras prioritarias.
+4. **Auditoría de cálculos**: cada número se recalcula por separado y se valida el optimizador contra el óptimo exacto.
 
-## Limitaciones
-- El Ayuntamiento solo publica el verde por distrito: el verde por barrio sale de OpenStreetMap, que es colaborativo (puede faltar o sobrar alguna zona).
-- Los 203 parques oficiales no traen superficie (radio aproximado). Distancias en línea recta, no a pie. Validación siguiente: Copernicus Urban Atlas.
-- En distritos muy grandes (Fuencarral-El Pardo, Moncloa-Aravaca) algún barrio pequeño queda con pocas celdas: la población modelada difiere del padrón en un 1-3 %.
-- Temperatura, reparto de población dentro del barrio y solares candidatos son sintéticos.
+`CLAUDE.md` recoge las reglas de trabajo y `PROMPT_ARRANQUE.md` el prompt de preparación de la prueba.
 
-## Accesibilidad
-Lectura fácil, texto grande, alto contraste, modo oscuro, español/inglés, lectura en voz alta y descripción textual de mapas y gráficos.
+## Licencia
+Código bajo licencia [MIT](LICENSE). Los datos conservan su licencia original (ver *Datos y atribución*).
