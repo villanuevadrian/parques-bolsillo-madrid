@@ -165,3 +165,12 @@ def test_validacion_contra_optimo_exacto(client, distrito, presupuesto):
     assert v["recocido_pct_optimo"] >= 95                    # el recocido queda a <5 % del óptimo
     assert v["recocido"] >= v["voraz"]
     assert v["veces_mejor_que_azar"] > 1.5
+
+
+
+def test_diseno_respeta_superficie_y_presupuesto(resultado):
+    for p in resultado["seleccion"]:
+        d = p["diseno"]
+        assert d["elementos"], "cada parque debe tener al menos un elemento"
+        assert d["m2_usados"] <= d["m2_disponibles"]
+        assert d["coste_equipamiento"] <= d["presupuesto_equipamiento"]

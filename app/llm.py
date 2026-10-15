@@ -44,12 +44,14 @@ def _fallback_parque(p: dict, estilo: str, idioma: str) -> str:
         return (f"New pocket park in {p['barrio']} ({p['m2']} m²). {p['nuevos_vecinos_300m']:,} people will have "
                 f"green space within 300 m. Streets around it will be about {p['bajada_temp_c']} °C cooler in summer.")
     if estilo == "facil":
-        return (f"Habrá un parque nuevo en {p['barrio']}. Estará cerca de tu casa. Tendrá sombra y bancos. "
+        return (f"Habrá un parque nuevo en {p['barrio']}. Estará cerca de tu casa. Tendrá "
+                f"{', '.join(e['elemento'].split(' (')[0].lower() for e in p.get('diseno', {}).get('elementos', [])[:3]) or 'sombra y bancos'}. "
                 f"En verano, la calle estará más fresca.")
     return (f"Parque bolsillo en {p['barrio']} ({p['tipo'].lower()}, {p['m2']} m², {_n(p['coste'])} €). "
             f"{_n(p['nuevos_vecinos_300m'])} vecinos ganan zona verde a menos de 300 m, de ellos "
             f"{_n(p['nuevos_vulnerables_300m'])} mayores o niños. Bajada estimada de {p['bajada_temp_c']} °C en las "
-            f"calles cercanas. Coste por vecino beneficiado: {p['coste_por_vecino']} €.")
+            f"calles cercanas. Coste por vecino beneficiado: {p['coste_por_vecino']} €. Incluye: "
+            f"{', '.join(e['elemento'].lower() for e in p.get('diseno', {}).get('elementos', [])) or 'diseño pendiente'}.")
 
 
 def explicar(datos: dict, tipo: str = "cartera", estilo: str = "pleno", idioma: str = "es") -> dict:

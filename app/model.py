@@ -7,6 +7,7 @@
 """
 from math import exp
 from pathlib import Path
+from itertools import combinations
 import json
 import random
 import unicodedata
@@ -22,6 +23,19 @@ FEATURES = ["pct_verde", "pct_asfalto", "densidad"]
 RADIO_M = 300        # OMS Europa: espacio verde a <300 m de casa
 RADIO_FRESCOR_M = 150  # alcance del efecto de enfriamiento de un parque pequeño (hipótesis)
 CELDA_M = 100
+# Catálogo de micro-intervenciones (hipótesis de orden de magnitud): huella m², coste €, beneficio 0-1 por dimensión
+ELEMENTOS = {
+    "Arbolado de sombra (10 árboles)":       {"m2": 150, "coste": 12_000, "mayores": .6, "ninos": .5, "calor": 1.0, "agua": .3},
+    "Pérgola con bancos y sombra":           {"m2": 40,  "coste": 15_000, "mayores": 1.0, "ninos": .3, "calor": .6, "agua": 0},
+    "Fuente de agua potable":                {"m2": 5,   "coste": 6_000,  "mayores": .6, "ninos": .6, "calor": .7, "agua": 0},
+    "Zona de juegos infantiles":             {"m2": 120, "coste": 35_000, "mayores": .1, "ninos": 1.0, "calor": 0, "agua": 0},
+    "Circuito biosaludable para mayores":    {"m2": 80,  "coste": 18_000, "mayores": 1.0, "ninos": .1, "calor": 0, "agua": 0},
+    "Jardín de lluvia / pavimento permeable": {"m2": 150, "coste": 20_000, "mayores": .1, "ninos": .1, "calor": .5, "agua": 1.0},
+    "Pradera de xerojardinería":             {"m2": 200, "coste": 10_000, "mayores": .3, "ninos": .4, "calor": .6, "agua": .6},
+    "Huerto urbano comunitario":             {"m2": 100, "coste": 12_000, "mayores": .8, "ninos": .5, "calor": .3, "agua": .2},
+}
+PCT_EQUIPAMIENTO = 0.35  # parte del coste del parque para equipamiento (el resto: obra base)
+PESO_AGUA = 0.3          # sostenibilidad hídrica: peso fijo
 
 
 def slug(s: str) -> str:
@@ -265,9 +279,40 @@ class Modelo:
                 "nuevos_vulnerables_300m": int(c["vulnerables"].iloc[idx].sum()),
                 "bajada_temp_c": self.delta_temp[i],
                 "coste_por_vecino": round(k["coste"] / max(c["poblacion"].iloc[idx].sum(), 1), 1),
+                "diseno": self.disenar(i),
             })
             out.append({kk: (v.item() if hasattr(v, "item") else v) for kk, v in k.items()})
         return sorted(out, key=lambda r: -r["nuevos_vulnerables_300m"])
+
+    def disenar(self, i: int) -> dict:
+        """Qué construir: mochila exacta (2^8 combinaciones) que maximiza el beneficio para quien vive a <300 m,
+        con la superficie del solar y el presupuesto de equipamiento como límites."""
+        c = self.celdas.iloc[self.cubre[i]]
+        may = float((c["poblacion"] * c["pct_mayores"]).sum())
+        nin = float((c["poblacion"] * c["pct_menores"]).sum())
+        t = self.celdas["temp_verano"]
+        calor = float(np.clip((c["temp_verano"].mean() - t.min()) / (t.max() - t.min() + 1e-9), 0, 1))
+        pesos = {"mayores": may / max(may + nin, 1), "ninos": nin / max(may + nin, 1), "calor": calor, "agua": PESO_AGUA}
+        m2_max = 0.85 * self.cand.loc[i, "m2"]
+        euros = PCT_EQUIPAMIENTO * self.cand.loc[i, "coste"]
+        util = {e: sum(pesos[g] * v[g] for g in pesos) for e, v in ELEMENTOS.items()}
+        mejor, u_mejor = (), -1.0
+        for r in range(1, len(ELEMENTOS) + 1):
+            for combo in combinations(ELEMENTOS, r):
+                if sum(ELEMENTOS[e]["m2"] for e in combo) <= m2_max and sum(ELEMENTOS[e]["coste"] for e in combo) <= euros:
+                    u = sum(util[e] for e in combo)
+                    if u > u_mejor:
+                        mejor, u_mejor = combo, u
+        motivo = {"mayores": "muchos mayores cerca", "ninos": "muchos niños cerca", "calor": "zona muy calurosa",
+                  "agua": "gestión sostenible del agua"}
+        return {
+            "elementos": [{"elemento": e, "m2": ELEMENTOS[e]["m2"], "coste": ELEMENTOS[e]["coste"],
+                           "motivo": motivo[max(pesos, key=lambda g: pesos[g] * ELEMENTOS[e][g])]} for e in mejor],
+            "perfil": {"mayores_300m": round(may), "ninos_300m": round(nin), "indice_calor": round(calor, 2)},
+            "m2_usados": sum(ELEMENTOS[e]["m2"] for e in mejor), "m2_disponibles": round(m2_max),
+            "coste_equipamiento": sum(ELEMENTOS[e]["coste"] for e in mejor), "presupuesto_equipamiento": round(euros),
+            "utilidad": round(u_mejor, 2),
+        }
 
     def diagnostico(self) -> list[dict]:
         cols = ["id", "lat", "lon", "barrio", "poblacion", "dist_verde_m", "temp_verano", "vulnerabilidad", "indice_deficit"]
