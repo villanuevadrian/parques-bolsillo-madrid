@@ -1,31 +1,31 @@
 id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
-0,3395,11.0,61.0,40.415031,-3.616779,Casco Histórico de Vicálvaro,Interior de manzana,791,129000,0,3210,247
-1,2603,75.0,49.0,40.40422,-3.541039,El Cañaveral,Calle a pacificar,744,189000,11,3102,180
-2,2810,16.0,52.0,40.406923,-3.610862,Casco Histórico de Vicálvaro,Interior de manzana,618,178000,0,2438,290
-3,1920,28.0,42.0,40.397914,-3.59666,Casco Histórico de Vicálvaro,Interior de manzana,410,82000,0,1810,150
+0,544,55.0,21.0,40.378995,-3.564708,Casco Histórico de Vicálvaro,Interior de manzana,791,129000,0,3210,247
+1,2597,69.0,49.0,40.40422,-3.54814,El Cañaveral,Calle a pacificar,744,189000,11,3102,180
+2,403,37.0,18.0,40.376292,-3.586009,Casco Histórico de Vicálvaro,Interior de manzana,618,178000,0,2438,290
+3,1609,79.0,38.0,40.39431,-3.536305,El Cañaveral,Interior de manzana,410,82000,0,1810,150
 4,3,55.0,1.0,40.360977,-3.564708,Casco Histórico de Vicálvaro,Solar municipal vacío,1482,327000,0,8580,838
 5,136,52.0,10.0,40.369085,-3.568258,Casco Histórico de Vicálvaro,Calle a pacificar,518,164000,8,1601,185
-6,706,42.0,25.0,40.382599,-3.580092,Casco Histórico de Vicálvaro,Solar municipal vacío,896,237000,0,5338,382
-7,1685,64.0,39.0,40.395211,-3.554057,El Cañaveral,Solar municipal vacío,1308,305000,0,7804,763
+6,2565,37.0,49.0,40.40422,-3.586009,Casco Histórico de Vicálvaro,Solar municipal vacío,896,237000,0,5338,382
+7,2631,14.0,50.0,40.405121,-3.613228,Casco Histórico de Vicálvaro,Solar municipal vacío,1308,305000,0,7804,763
 8,2124,50.0,44.0,40.399716,-3.570625,Casco Histórico de Vicálvaro,Patio escolar abierto en verano,861,246000,0,2730,236
-9,463,56.0,19.0,40.377193,-3.563524,Casco Histórico de Vicálvaro,Calle a pacificar,398,108000,6,1384,216
-10,1708,87.0,39.0,40.395211,-3.526838,El Cañaveral,Calle a pacificar,453,88000,7,1632,186
-11,2258,93.0,45.0,40.400617,-3.519737,El Cañaveral,Solar municipal vacío,344,98000,0,1485,169
-12,1856,54.0,41.0,40.397013,-3.565891,Casco Histórico de Vicálvaro,Patio escolar abierto en verano,596,168000,0,3282,160
-13,1424,78.0,36.0,40.392509,-3.537489,El Cañaveral,Calle a pacificar,391,86000,6,2261,108
-14,3196,65.0,56.0,40.410527,-3.552873,El Cañaveral,Interior de manzana,766,125000,0,3240,448
-15,1658,37.0,39.0,40.395211,-3.586009,Casco Histórico de Vicálvaro,Calle a pacificar,494,113000,7,2274,156
-16,636,62.0,23.0,40.380797,-3.556424,Casco Histórico de Vicálvaro,Solar municipal vacío,879,219000,0,3930,194
-17,2743,37.0,51.0,40.406022,-3.586009,Casco Histórico de Vicálvaro,Calle a pacificar,634,191000,10,3703,323
-18,2672,55.0,50.0,40.405121,-3.564708,El Cañaveral,Patio escolar abierto en verano,498,123000,0,1660,210
-19,305,58.0,15.0,40.37359,-3.561157,Casco Histórico de Vicálvaro,Interior de manzana,693,163000,0,3082,311
+9,304,57.0,15.0,40.37359,-3.562341,Casco Histórico de Vicálvaro,Calle a pacificar,398,108000,6,1384,216
+10,680,62.0,24.0,40.381698,-3.556424,Casco Histórico de Vicálvaro,Calle a pacificar,453,88000,7,1632,186
+11,2468,30.0,48.0,40.403319,-3.594293,Casco Histórico de Vicálvaro,Solar municipal vacío,344,98000,0,1485,169
+12,1792,80.0,40.0,40.396112,-3.535122,El Cañaveral,Patio escolar abierto en verano,596,168000,0,3282,160
+13,359,34.0,17.0,40.375392,-3.58956,Casco Histórico de Vicálvaro,Calle a pacificar,391,86000,6,2261,108
+14,722,58.0,25.0,40.382599,-3.561157,Casco Histórico de Vicálvaro,Interior de manzana,766,125000,0,3240,448
+15,1494,56.0,37.0,40.39341,-3.563524,Casco Histórico de Vicálvaro,Calle a pacificar,494,113000,7,2274,156
+16,3010,42.0,54.0,40.408725,-3.580092,El Cañaveral,Solar municipal vacío,879,219000,0,3930,194
+17,3190,59.0,56.0,40.410527,-3.559974,El Cañaveral,Calle a pacificar,634,191000,10,3703,323
+18,1493,55.0,37.0,40.39341,-3.564708,Casco Histórico de Vicálvaro,Patio escolar abierto en verano,498,123000,0,1660,210
+19,3119,68.0,55.0,40.409626,-3.549323,El Cañaveral,Interior de manzana,693,163000,0,3082,311
 20,123,39.0,10.0,40.369085,-3.583643,Casco Histórico de Vicálvaro,Interior de manzana,325,89000,0,1572,138
-21,1729,17.0,40.0,40.396112,-3.609678,Valdebernardo,Calle a pacificar,865,212000,13,4195,496
-22,1641,20.0,39.0,40.395211,-3.606128,Valderrivas,Interior de manzana,627,151000,0,3331,284
+21,3451,42.0,67.0,40.420437,-3.580092,Casco Histórico de Vicálvaro,Calle a pacificar,865,212000,13,4195,496
+22,3218,87.0,56.0,40.410527,-3.526838,El Cañaveral,Interior de manzana,627,151000,0,3331,284
 23,13,52.0,3.0,40.362779,-3.568258,Casco Histórico de Vicálvaro,Solar municipal vacío,684,155000,0,3408,321
-24,1182,85.0,33.0,40.389806,-3.529205,El Cañaveral,Solar municipal vacío,945,297000,0,4665,305
-25,1347,1.0,36.0,40.392509,-3.628613,Valdebernardo,Interior de manzana,559,139000,0,2579,200
-26,1076,40.0,32.0,40.388905,-3.582459,Casco Histórico de Vicálvaro,Calle a pacificar,295,91000,4,1080,90
-27,540,51.0,21.0,40.378995,-3.569441,Casco Histórico de Vicálvaro,Solar municipal vacío,592,117000,0,1827,184
-28,2860,66.0,52.0,40.406923,-3.55169,El Cañaveral,Patio escolar abierto en verano,628,167000,0,3491,135
-29,2545,17.0,49.0,40.40422,-3.609678,Casco Histórico de Vicálvaro,Interior de manzana,200,59000,0,683,74
+24,1202,26.0,34.0,40.390707,-3.599027,Casco Histórico de Vicálvaro,Solar municipal vacío,945,297000,0,4665,305
+25,2619,91.0,49.0,40.40422,-3.522104,El Cañaveral,Interior de manzana,559,139000,0,2579,200
+26,780,69.0,26.0,40.3835,-3.54814,Casco Histórico de Vicálvaro,Calle a pacificar,295,91000,4,1080,90
+27,2790,84.0,51.0,40.406022,-3.530388,El Cañaveral,Solar municipal vacío,592,117000,0,1827,184
+28,951,35.0,30.0,40.387103,-3.588376,Casco Histórico de Vicálvaro,Patio escolar abierto en verano,628,167000,0,3491,135
+29,3271,67.0,57.0,40.411428,-3.550506,El Cañaveral,Interior de manzana,200,59000,0,683,74

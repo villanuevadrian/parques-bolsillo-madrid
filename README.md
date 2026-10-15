@@ -53,7 +53,7 @@ flowchart LR
 | Cálculo | Fórmula | Justificación / fuente |
 |---|---|---|
 | **Acceso a verde (KPI principal)** | % de mayores (≥65) y niños (<12) cuya celda está a ≤300 m en línea recta de un espacio verde de ≥0,5 ha | Indicador de la **OMS Europa** (*Urban green spaces: a brief for action*, 2017): verde de 0,5–1 ha a 300 m |
-| **Distancia al verde** | distancia del centro de la celda al centro de la zona verde − su radio equivalente (√(superficie/π)) | Superficie real de OpenStreetMap; parques municipales sin superficie: radio 150 m (parque) / 50 m (jardín) |
+| **Distancia al verde** | distancia en línea recta del centro de la celda al **borde real** más cercano de una zona verde de ≥0,5 ha (borde muestreado cada 20 m; 0 si la celda está dentro) | Contornos de OpenStreetMap. Los 203 parques municipales sin contorno: centro + radio 150 m (parque) / 50 m (jardín) |
 | **Verde por habitante** | m² de verde ÷ padrón | Distrito: dato oficial del Ayuntamiento. Barrio: suma de zonas OSM dentro del límite oficial del barrio |
 | **Prioridad de barrio** | 0,6 × vulnerabilidad + 0,4 × déficit verde (1 − min(m²/hab, 15)/15) | Vulnerabilidad: ranking oficial del Ayuntamiento. 15 m²/hab: rango alto de las recomendaciones habituales (9–15). Pesos: hipótesis editable |
 | **Índice de déficit de celda** | 0,45 × lejanía (dist/600 m) + 0,30 × calor (normalizado) + 0,25 × vulnerabilidad | Pondera la proximidad (criterio OMS) por encima del calor y la equidad. Pesos: hipótesis editable |

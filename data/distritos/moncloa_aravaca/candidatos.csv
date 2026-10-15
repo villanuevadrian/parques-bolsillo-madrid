@@ -1,32 +1,32 @@
 id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
-0,4327,60.0,80.0,40.471169,-3.767266,Valdemarín,Interior de manzana,387,77000,0,1974,207
-1,617,76.0,22.0,40.418917,-3.748331,Casa de Campo,Interior de manzana,716,220000,0,3465,163
-2,4500,84.0,82.0,40.472971,-3.738864,Ciudad Universitaria,Interior de manzana,342,74000,0,1377,153
-3,1954,53.0,50.0,40.444142,-3.77555,Aravaca,Calle a pacificar,602,165000,9,2318,124
-4,1475,74.0,39.0,40.434233,-3.750698,Casa de Campo,Solar municipal vacío,1415,225000,0,6501,284
-5,3819,52.0,75.0,40.466665,-3.776734,Valdemarín,Solar municipal vacío,1043,199000,0,3142,518
-6,2904,66.0,64.0,40.456755,-3.760166,Aravaca,Interior de manzana,387,112000,0,1611,113
-7,4524,50.0,83.0,40.473872,-3.7791,Valdemarín,Solar municipal vacío,846,269000,0,3602,472
-8,3592,33.0,73.0,40.464863,-3.799219,Aravaca,Patio escolar abierto en verano,422,91000,0,1361,111
-9,1791,80.0,46.0,40.440539,-3.743597,Ciudad Universitaria,Solar municipal vacío,515,115000,0,1677,297
-10,412,62.0,18.0,40.415314,-3.764899,Casa de Campo,Interior de manzana,209,44000,0,1131,102
-11,2896,58.0,64.0,40.456755,-3.769633,Aravaca,Solar municipal vacío,1111,170000,0,4028,461
-12,4464,21.0,82.0,40.472971,-3.81342,El Plantío,Patio escolar abierto en verano,1033,182000,0,5457,595
-13,2957,48.0,65.0,40.457656,-3.781467,Aravaca,Interior de manzana,715,170000,0,2698,169
-14,4260,82.0,79.0,40.470269,-3.741231,Ciudad Universitaria,Interior de manzana,241,59000,0,1380,75
-15,281,53.0,15.0,40.412611,-3.77555,Casa de Campo,Patio escolar abierto en verano,990,173000,0,4011,576
-16,2425,68.0,57.0,40.450449,-3.757799,Ciudad Universitaria,Interior de manzana,445,116000,0,2667,218
-17,2872,104.0,63.0,40.455854,-3.715195,Ciudad Universitaria,Solar municipal vacío,887,238000,0,2851,436
-18,1702,81.0,44.0,40.438737,-3.742414,Ciudad Universitaria,Interior de manzana,705,132000,0,2740,421
-19,503,61.0,20.0,40.417115,-3.766083,Casa de Campo,Solar municipal vacío,654,207000,0,2707,358
-20,223,65.0,13.0,40.410809,-3.761349,Casa de Campo,Patio escolar abierto en verano,456,133000,0,1737,252
-21,1590,101.0,41.0,40.436034,-3.718745,Ciudad Universitaria,Solar municipal vacío,1162,345000,0,6792,473
-22,2991,82.0,65.0,40.457656,-3.741231,Ciudad Universitaria,Solar municipal vacío,686,205000,0,3751,180
-23,1035,58.0,30.0,40.426124,-3.769633,Casa de Campo,Solar municipal vacío,751,140000,0,3356,339
-24,3159,102.0,67.0,40.459458,-3.717562,Valdezarza,Solar municipal vacío,973,269000,0,3935,550
-25,2455,98.0,57.0,40.450449,-3.722296,Ciudad Universitaria,Patio escolar abierto en verano,1109,346000,0,5233,480
-26,4038,59.0,77.0,40.468467,-3.76845,Valdemarín,Patio escolar abierto en verano,582,150000,0,2082,271
-27,4161,79.0,78.0,40.469368,-3.744781,Ciudad Universitaria,Interior de manzana,681,173000,0,2209,198
-28,2883,45.0,64.0,40.456755,-3.785018,Aravaca,Interior de manzana,591,174000,0,3169,172
-29,3174,40.0,68.0,40.460359,-3.790935,Aravaca,Patio escolar abierto en verano,934,172000,0,3009,479
-30,2751,52.0,62.0,40.454953,-3.776734,Aravaca,Calle a pacificar,382,99000,6,1329,84
+0,1132,103.0,31.0,40.427025,-3.716379,Argüelles,Interior de manzana,387,77000,0,1974,207
+1,2706,76.0,61.0,40.454052,-3.748331,Ciudad Universitaria,Interior de manzana,716,220000,0,3465,163
+2,677,86.0,23.0,40.419818,-3.736497,Casa de Campo,Interior de manzana,342,74000,0,1377,153
+3,3249,38.0,69.0,40.46126,-3.793302,Aravaca,Calle a pacificar,602,165000,9,2318,124
+4,460,65.0,19.0,40.416215,-3.761349,Casa de Campo,Solar municipal vacío,1415,225000,0,6501,284
+5,879,68.0,27.0,40.423422,-3.757799,Casa de Campo,Solar municipal vacío,1043,199000,0,3142,518
+6,1704,83.0,44.0,40.438737,-3.740047,Ciudad Universitaria,Interior de manzana,387,112000,0,1611,113
+7,4394,47.0,81.0,40.47207,-3.782651,Valdemarín,Solar municipal vacío,846,269000,0,3602,472
+8,4084,105.0,77.0,40.468467,-3.714012,Valdezarza,Patio escolar abierto en verano,422,91000,0,1361,111
+9,2454,97.0,57.0,40.450449,-3.723479,Ciudad Universitaria,Solar municipal vacío,515,115000,0,1677,297
+10,4362,96.0,80.0,40.471169,-3.724663,Valdezarza,Interior de manzana,209,44000,0,1131,102
+11,691,49.0,24.0,40.420719,-3.780284,Casa de Campo,Solar municipal vacío,1111,170000,0,4028,461
+12,2924,86.0,64.0,40.456755,-3.736497,Ciudad Universitaria,Patio escolar abierto en verano,1033,182000,0,5457,595
+13,660,69.0,23.0,40.419818,-3.756615,Casa de Campo,Interior de manzana,715,170000,0,2698,169
+14,3389,99.0,70.0,40.46216,-3.721112,Ciudad Universitaria,Interior de manzana,241,59000,0,1380,75
+15,1815,59.0,47.0,40.44144,-3.76845,Casa de Campo,Patio escolar abierto en verano,990,173000,0,4011,576
+16,2526,100.0,58.0,40.45135,-3.719929,Ciudad Universitaria,Interior de manzana,445,116000,0,2667,218
+17,3865,98.0,75.0,40.466665,-3.722296,Valdezarza,Solar municipal vacío,887,238000,0,2851,436
+18,351,85.0,16.0,40.413512,-3.73768,Casa de Campo,Interior de manzana,705,132000,0,2740,421
+19,3667,108.0,73.0,40.464863,-3.710461,Valdezarza,Solar municipal vacío,654,207000,0,2707,358
+20,4128,46.0,78.0,40.469368,-3.783834,Valdemarín,Patio escolar abierto en verano,456,133000,0,1737,252
+21,4435,88.0,81.0,40.47207,-3.73413,Ciudad Universitaria,Solar municipal vacío,1162,345000,0,6792,473
+22,812,58.0,26.0,40.422521,-3.769633,Casa de Campo,Solar municipal vacío,686,205000,0,3751,180
+23,934,66.0,28.0,40.424323,-3.760166,Casa de Campo,Solar municipal vacío,751,140000,0,3356,339
+24,2540,45.0,59.0,40.452251,-3.785018,Aravaca,Solar municipal vacío,973,269000,0,3935,550
+25,1878,77.0,48.0,40.442341,-3.747148,Ciudad Universitaria,Patio escolar abierto en verano,1109,346000,0,5233,480
+26,3290,79.0,69.0,40.46126,-3.744781,Ciudad Universitaria,Patio escolar abierto en verano,582,150000,0,2082,271
+27,2525,99.0,58.0,40.45135,-3.721112,Ciudad Universitaria,Interior de manzana,681,173000,0,2209,198
+28,2831,63.0,63.0,40.455854,-3.763716,Aravaca,Interior de manzana,591,174000,0,3169,172
+29,1331,65.0,36.0,40.43153,-3.761349,Casa de Campo,Patio escolar abierto en verano,934,172000,0,3009,479
+30,2135,54.0,53.0,40.446845,-3.774367,Aravaca,Calle a pacificar,382,99000,6,1329,84

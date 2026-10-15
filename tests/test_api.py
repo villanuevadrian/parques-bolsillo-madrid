@@ -7,6 +7,7 @@ import os
 # así una clave en .env no se cuela en los tests.
 os.environ["ANTHROPIC_API_KEY"] = ""
 
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
@@ -119,3 +120,37 @@ def test_verde_por_barrio_osm(client):
     b = client.get("/barrios").json()
     assert all("m2_hab_barrio" in x and "parques_bolsillo" in x for x in b)
     assert sum(x["parques_bolsillo"] for x in b) > 1000  # Madrid tiene miles de zonas verdes pequeñas
+
+
+# ---------- Auditoría de cálculos (recalculados de forma independiente) ----------
+def _dentro(lon, lat, poly):
+    x, y = poly[:, 0], poly[:, 1]
+    x2, y2 = np.roll(x, -1), np.roll(y, -1)
+    cr = ((y[None] > lat[:, None]) != (y2[None] > lat[:, None])) & (
+        lon[:, None] < (x2 - x)[None] * (lat[:, None] - y[None]) / ((y2 - y)[None] + 1e-15) + x[None])
+    return cr.sum(axis=1) % 2 == 1
+
+
+def test_auditoria_celdas_dentro_de_su_barrio_oficial():
+    c = modelo.celdas
+    dentro = 0
+    for f in modelo.barrios_geo["features"]:
+        sub = c[c["barrio"] == f["properties"]["nombre"]]
+        dentro += _dentro(sub["lon"].to_numpy(), sub["lat"].to_numpy(), np.array(f["geometry"]["coordinates"][0])).sum()
+    assert dentro == len(c)
+
+
+def test_auditoria_poblacion_igual_al_padron_por_barrio():
+    padron = modelo.barrios.set_index("barrio")["poblacion"]
+    suma = modelo.celdas.groupby("barrio")["poblacion"].sum()
+    assert (suma - padron.reindex(suma.index)).abs().max() <= 50  # solo redondeo
+
+
+def test_auditoria_cobertura_recalculada_a_mano(resultado):
+    c, M_LON, M_LAT = modelo.celdas, 84_500, 111_000
+    cub = c["dist_verde_m"].to_numpy() <= 300
+    for p in resultado["seleccion"]:
+        cub |= (np.hypot((c["lon"] - p["lon"]) * M_LON, (c["lat"] - p["lat"]) * M_LAT) <= 300.5).to_numpy()
+    pct = 100 * c["vulnerables"][cub].sum() / c["vulnerables"].sum()
+    assert abs(pct - resultado["kpis_despues"]["pct_vulnerables_300m"]) < 0.2
+    assert sum(p["coste"] for p in resultado["seleccion"]) == resultado["kpis_despues"]["inversion"]

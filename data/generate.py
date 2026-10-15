@@ -116,7 +116,7 @@ def area_m2(coords):
     return abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))) / 2
 
 
-osm, GEOM = [], []
+osm, GEOM, GEOM_FULL = [], [], []
 for e in json.loads((RAW / "osm_verde.json").read_text(encoding="utf-8"))["elements"]:
     t = e.get("tags", {})
     if t.get("leisure") == "garden" and "name" not in t:
@@ -134,7 +134,8 @@ for e in json.loads((RAW / "osm_verde.json").read_text(encoding="utf-8"))["eleme
         continue
     osm.append({"nombre": t.get("name", "Zona verde sin nombre"), "lon": todos[:, 0].mean(), "lat": todos[:, 1].mean(),
                 "m2": round(m2), "radio_m": round(float(np.sqrt(m2 / np.pi)), 1), "bolsillo": m2 < 5000})
-    GEOM.append([np.round(a[:: max(1, len(a) // 60)], 5).tolist() for a in anillos])  # contorno simplificado
+    GEOM.append([np.round(a[:: max(1, len(a) // 60)], 5).tolist() for a in anillos])  # contorno simplificado (mapa)
+    GEOM_FULL.append(anillos)  # contorno completo (cálculo de distancias)
 OSM = pd.DataFrame(osm)
 OSM["cod_barrio"] = 0
 for _, cb, _, poly in POLIS:
@@ -159,8 +160,19 @@ b.to_csv(OUT / "barrios.csv", index=False)
 # Acceso según la OMS Europa: espacio verde de al menos 0,5 ha a <300 m. Los parques bolsillo existentes cuentan en el
 # verde por barrio, pero no como acceso OMS: el parque bolsillo nuevo es la micro-intervención para quien no lo tiene.
 MIN_OMS_M2 = 5000
-VERDE = pd.concat([OSM[OSM["m2"] >= MIN_OMS_M2][["lat", "lon", "radio_m"]], PARQUES[["lat", "lon", "radio_m"]]],
-                  ignore_index=True)
+# Distancia al CONTORNO real: puntos cada 20 m a lo largo de cada borde de las zonas OMS (≥0,5 ha) de OpenStreetMap
+GRANDES = [i for i in OSM.index if OSM.at[i, "m2"] >= MIN_OMS_M2]
+bordes = []
+for i in GRANDES:
+    for a in GEOM_FULL[i]:
+        for p0, p1 in zip(a[:-1], a[1:]):
+            n = max(1, int(np.hypot((p1[0] - p0[0]) * M_LON, (p1[1] - p0[1]) * M_LAT) // 20))
+            t = np.linspace(0, 1, n, endpoint=False)[:, None]
+            bordes.append(p0 + t * (p1 - p0))
+BORDES = np.vstack(bordes)
+BORDES_TREE = cKDTree(np.column_stack([BORDES[:, 0] * M_LON, BORDES[:, 1] * M_LAT]))
+# Los 203 parques municipales no tienen contorno: centro + radio aproximado (complementan a OSM)
+VERDE = PARQUES[["lat", "lon", "radio_m"]].reset_index(drop=True)
 
 CELDA, ANILLO_M = 100, 300
 TIPOS = {  # tipo: (m2 min, m2 max, plazas de aparcamiento perdidas por 100 m2)
@@ -198,10 +210,17 @@ def generar_distrito(cod: int, nombre: str):
     en_anillo = ~mio & (d_mio * CELDA <= ANILLO_M)
 
     # Distancia al parque real más cercano, sea del distrito que sea
-    pxy = np.column_stack([(VERDE["lon"] - lon0) * M_LON, (VERDE["lat"] - lat0) * M_LAT])
-    cxy = np.column_stack([(g_lon - lon0) * M_LON, (g_lat - lat0) * M_LAT])
-    dk, ik = cKDTree(pxy).query(cxy, k=12)  # 12 zonas verdes más cercanas a cada celda
-    dist_verde = (dk - VERDE["radio_m"].to_numpy()[ik]).min(axis=1)
+    cxy = np.column_stack([g_lon * M_LON, g_lat * M_LAT])
+    d_borde, _ = BORDES_TREE.query(cxy)  # distancia al borde real más cercano de una zona OMS
+    for i in GRANDES:  # celdas DENTRO de una zona verde: distancia 0
+        if not (lon0 - 0.01 < OSM.at[i, "lon"] < lon0 + mx / M_LON + 0.01 and lat0 - 0.01 < OSM.at[i, "lat"] < lat0 + my / M_LAT + 0.01):
+            continue
+        for a in GEOM_FULL[i]:
+            d_borde[dentro(g_lon, g_lat, a)] = 0
+    pxy = np.column_stack([VERDE["lon"] * M_LON, VERDE["lat"] * M_LAT])
+    dk, ik = cKDTree(pxy).query(cxy, k=5)
+    d_oficial = (dk - VERDE["radio_m"].to_numpy()[ik]).min(axis=1)
+    dist_verde = np.minimum(d_borde, d_oficial)
 
     dist_dir = OUT / "distritos" / slug(nombre)
     dist_dir.mkdir(parents=True, exist_ok=True)

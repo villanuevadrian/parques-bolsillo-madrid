@@ -1,42 +1,42 @@
 id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
-0,477,21.0,27.0,40.470533,-3.688427,Almenara,Solar municipal vacío,1372,390000,0,7310,655
-1,429,14.0,25.0,40.468731,-3.696711,Almenara,Solar municipal vacío,1395,441000,0,4495,389
+0,298,12.0,18.0,40.462425,-3.699077,Valdeacederas,Solar municipal vacío,1372,390000,0,7310,655
+1,288,17.0,17.0,40.461524,-3.69316,Castillejos,Solar municipal vacío,1395,441000,0,4495,389
 2,34,9.0,3.0,40.448912,-3.702628,Cuatro Caminos,Calle a pacificar,586,102000,9,1840,194
-3,339,20.0,20.0,40.464227,-3.68961,Castillejos,Interior de manzana,289,73000,0,1614,128
-4,459,3.0,27.0,40.470533,-3.709728,Valdeacederas,Solar municipal vacío,855,252000,0,4996,506
-5,368,12.0,22.0,40.466029,-3.699077,Valdeacederas,Calle a pacificar,664,185000,10,3099,354
-6,330,11.0,20.0,40.464227,-3.700261,Valdeacederas,Calle a pacificar,259,48000,4,1156,96
+3,393,18.0,23.0,40.46693,-3.691977,Almenara,Interior de manzana,289,73000,0,1614,128
+4,456,21.0,26.0,40.469632,-3.688427,Almenara,Solar municipal vacío,855,252000,0,4996,506
+5,375,19.0,22.0,40.466029,-3.690793,Almenara,Calle a pacificar,664,185000,10,3099,354
+6,399,4.0,24.0,40.46783,-3.708545,Valdeacederas,Calle a pacificar,259,48000,4,1156,96
 7,69,12.0,5.0,40.450713,-3.699077,Cuatro Caminos,Interior de manzana,654,199000,0,3052,138
-8,224,19.0,13.0,40.457921,-3.690793,Castillejos,Solar municipal vacío,1072,254000,0,3881,257
+8,255,16.0,15.0,40.459722,-3.694344,Castillejos,Solar municipal vacío,1072,254000,0,3881,257
 9,31,6.0,3.0,40.448912,-3.706178,Bellas Vistas,Solar municipal vacío,1394,380000,0,7227,698
-10,492,18.0,28.0,40.471434,-3.691977,Almenara,Interior de manzana,476,97000,0,2334,98
-11,240,18.0,14.0,40.458821,-3.691977,Castillejos,Interior de manzana,525,140000,0,1750,226
-12,177,8.0,11.0,40.456119,-3.703811,Berruguete,Interior de manzana,575,155000,0,2132,247
-13,332,13.0,20.0,40.464227,-3.697894,Valdeacederas,Solar municipal vacío,1321,412000,0,6076,478
+10,418,3.0,25.0,40.468731,-3.709728,Valdeacederas,Interior de manzana,476,97000,0,2334,98
+11,163,13.0,10.0,40.455218,-3.697894,Cuatro Caminos,Interior de manzana,525,140000,0,1750,226
+12,172,3.0,11.0,40.456119,-3.709728,Bellas Vistas,Interior de manzana,575,155000,0,2132,247
+13,333,14.0,20.0,40.464227,-3.696711,Valdeacederas,Solar municipal vacío,1321,412000,0,6076,478
 14,190,3.0,12.0,40.45702,-3.709728,Bellas Vistas,Calle a pacificar,675,134000,10,2112,261
-15,314,12.0,19.0,40.463326,-3.699077,Valdeacederas,Solar municipal vacío,926,198000,0,5065,191
-16,167,17.0,10.0,40.455218,-3.69316,Cuatro Caminos,Solar municipal vacío,1139,264000,0,6732,415
-17,334,15.0,20.0,40.464227,-3.695527,Castillejos,Solar municipal vacío,1494,466000,0,5133,307
+15,313,11.0,19.0,40.463326,-3.700261,Valdeacederas,Solar municipal vacío,926,198000,0,5065,191
+16,434,19.0,25.0,40.468731,-3.690793,Almenara,Solar municipal vacío,1139,264000,0,6732,415
+17,338,19.0,20.0,40.464227,-3.690793,Castillejos,Solar municipal vacío,1494,466000,0,5133,307
 18,49,8.0,4.0,40.449812,-3.703811,Bellas Vistas,Solar municipal vacío,1036,308000,0,5390,317
-19,383,8.0,23.0,40.46693,-3.703811,Valdeacederas,Interior de manzana,213,51000,0,1229,115
+19,208,3.0,13.0,40.457921,-3.709728,Berruguete,Interior de manzana,213,51000,0,1229,115
 20,95,2.0,7.0,40.452515,-3.710912,Bellas Vistas,Interior de manzana,775,202000,0,2363,193
-21,397,2.0,24.0,40.46783,-3.710912,Valdeacederas,Patio escolar abierto en verano,554,91000,0,2578,146
-22,447,12.0,26.0,40.469632,-3.699077,Almenara,Patio escolar abierto en verano,869,202000,0,3719,195
-23,452,17.0,26.0,40.469632,-3.69316,Almenara,Patio escolar abierto en verano,1008,227000,0,4605,519
-24,299,13.0,18.0,40.462425,-3.697894,Valdeacederas,Patio escolar abierto en verano,607,152000,0,2178,257
-25,402,7.0,24.0,40.46783,-3.704995,Valdeacederas,Solar municipal vacío,797,226000,0,4067,380
-26,303,17.0,18.0,40.462425,-3.69316,Castillejos,Calle a pacificar,606,143000,9,3141,305
-27,369,13.0,22.0,40.466029,-3.697894,Valdeacederas,Solar municipal vacío,893,161000,0,2980,345
+21,309,7.0,19.0,40.463326,-3.704995,Berruguete,Patio escolar abierto en verano,554,91000,0,2578,146
+22,315,13.0,19.0,40.463326,-3.697894,Valdeacederas,Patio escolar abierto en verano,869,202000,0,3719,195
+23,449,14.0,26.0,40.469632,-3.696711,Almenara,Patio escolar abierto en verano,1008,227000,0,4605,519
+24,297,11.0,18.0,40.462425,-3.700261,Valdeacederas,Patio escolar abierto en verano,607,152000,0,2178,257
+25,395,20.0,23.0,40.46693,-3.68961,Almenara,Solar municipal vacío,797,226000,0,4067,380
+26,488,14.0,28.0,40.471434,-3.696711,Almenara,Calle a pacificar,606,143000,9,3141,305
+27,494,20.0,28.0,40.471434,-3.68961,Almenara,Solar municipal vacío,893,161000,0,2980,345
 28,4,9.0,1.0,40.44711,-3.702628,Cuatro Caminos,Patio escolar abierto en verano,1177,197000,0,5116,311
 29,70,13.0,5.0,40.450713,-3.697894,Cuatro Caminos,Calle a pacificar,681,111000,10,3338,229
-30,115,3.0,8.0,40.453416,-3.709728,Bellas Vistas,Interior de manzana,787,127000,0,3856,277
-31,319,17.0,19.0,40.463326,-3.69316,Castillejos,Solar municipal vacío,920,166000,0,3556,424
-32,264,9.0,16.0,40.460623,-3.702628,Berruguete,Solar municipal vacío,789,224000,0,2947,160
-33,524,12.0,31.0,40.474137,-3.699077,Almenara,Calle a pacificar,477,88000,7,2549,180
+30,114,2.0,8.0,40.453416,-3.710912,Bellas Vistas,Interior de manzana,787,127000,0,3856,277
+31,318,16.0,19.0,40.463326,-3.694344,Castillejos,Solar municipal vacío,920,166000,0,3556,424
+32,249,10.0,15.0,40.459722,-3.701444,Berruguete,Solar municipal vacío,789,224000,0,2947,160
+33,211,6.0,13.0,40.457921,-3.706178,Berruguete,Calle a pacificar,477,88000,7,2549,180
 34,65,8.0,5.0,40.450713,-3.703811,Bellas Vistas,Calle a pacificar,367,68000,6,1800,183
-35,170,1.0,11.0,40.456119,-3.712095,Bellas Vistas,Solar municipal vacío,306,71000,0,1343,164
-36,185,16.0,11.0,40.456119,-3.694344,Cuatro Caminos,Solar municipal vacío,1199,213000,0,7024,537
-37,256,17.0,15.0,40.459722,-3.69316,Castillejos,Calle a pacificar,482,154000,7,1694,198
-38,220,15.0,13.0,40.457921,-3.695527,Castillejos,Solar municipal vacío,1486,271000,0,7337,712
-39,437,2.0,26.0,40.469632,-3.710912,Valdeacederas,Interior de manzana,272,51000,0,1369,136
-40,253,14.0,15.0,40.459722,-3.696711,Castillejos,Calle a pacificar,665,162000,10,3386,199
+35,367,11.0,22.0,40.466029,-3.700261,Valdeacederas,Solar municipal vacío,306,71000,0,1343,164
+36,328,9.0,20.0,40.464227,-3.702628,Valdeacederas,Solar municipal vacío,1199,213000,0,7024,537
+37,193,6.0,12.0,40.45702,-3.706178,Berruguete,Calle a pacificar,482,154000,7,1694,198
+38,183,14.0,11.0,40.456119,-3.696711,Cuatro Caminos,Solar municipal vacío,1486,271000,0,7337,712
+39,303,17.0,18.0,40.462425,-3.69316,Castillejos,Interior de manzana,272,51000,0,1369,136
+40,337,18.0,20.0,40.464227,-3.691977,Castillejos,Calle a pacificar,665,162000,10,3386,199

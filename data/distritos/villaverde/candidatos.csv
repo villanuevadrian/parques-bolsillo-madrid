@@ -1,44 +1,44 @@
 id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
-0,603,55.0,16.0,40.334469,-3.65984,Butarque,Solar municipal vacío,354,98000,0,1565,92
-1,665,8.0,18.0,40.336271,-3.715462,"Villaverde Alto, Casco Histórico de Villaverde",Patio escolar abierto en verano,446,124000,0,1483,102
-2,310,33.0,11.0,40.329965,-3.685876,Butarque,Solar municipal vacío,352,102000,0,1629,173
-3,115,13.0,7.0,40.326361,-3.709544,"Villaverde Alto, Casco Histórico de Villaverde",Patio escolar abierto en verano,621,117000,0,3013,300
-4,937,17.0,23.0,40.340776,-3.704811,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,474,104000,7,1523,100
-5,49,31.0,4.0,40.323659,-3.688243,Butarque,Interior de manzana,749,190000,0,3185,383
-6,822,6.0,21.0,40.338974,-3.717828,"Villaverde Alto, Casco Histórico de Villaverde",Patio escolar abierto en verano,427,88000,0,1502,253
-7,256,30.0,10.0,40.329064,-3.689426,Butarque,Calle a pacificar,700,169000,10,3144,297
-8,1502,16.0,35.0,40.351587,-3.705994,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,559,90000,0,3176,243
-9,950,30.0,23.0,40.340776,-3.689426,San Cristóbal,Solar municipal vacío,1307,267000,0,5461,298
-10,1112,38.0,26.0,40.343478,-3.679959,Butarque,Interior de manzana,726,207000,0,2751,179
-11,476,38.0,14.0,40.332668,-3.679959,Butarque,Interior de manzana,740,187000,0,2949,419
-12,1435,35.0,33.0,40.349785,-3.683509,Butarque,Interior de manzana,762,176000,0,4053,261
-13,1629,20.0,38.0,40.354289,-3.70126,Ángeles,Solar municipal vacío,374,85000,0,1694,162
-14,118,16.0,7.0,40.326361,-3.705994,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,814,240000,0,3632,335
-15,417,33.0,13.0,40.331767,-3.685876,Butarque,Calle a pacificar,617,159000,9,3247,126
-16,1604,35.0,37.0,40.353388,-3.683509,Butarque,Solar municipal vacío,1432,295000,0,5113,457
-17,202,21.0,9.0,40.328163,-3.700077,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,728,224000,0,3920,295
-18,1550,22.0,36.0,40.352487,-3.698893,Ángeles,Calle a pacificar,273,78000,4,1073,78
-19,541,48.0,15.0,40.333569,-3.668124,Butarque,Solar municipal vacío,336,88000,0,1403,89
-20,749,39.0,19.0,40.337172,-3.678775,Butarque,Solar municipal vacío,1331,246000,0,5046,556
-21,691,34.0,18.0,40.336271,-3.684692,Butarque,Calle a pacificar,756,205000,11,2345,421
-22,1045,22.0,25.0,40.342578,-3.698893,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,879,225000,0,4531,354
-23,593,45.0,16.0,40.334469,-3.671675,Butarque,Interior de manzana,569,137000,0,1857,290
-24,675,18.0,18.0,40.336271,-3.703627,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,759,137000,11,4095,242
-25,1027,4.0,25.0,40.342578,-3.720195,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,337,85000,0,1592,137
-26,1983,18.0,48.0,40.363298,-3.703627,Ángeles,Patio escolar abierto en verano,424,77000,0,2308,182
-27,1998,5.0,49.0,40.364199,-3.719012,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,426,76000,0,2139,196
-28,660,3.0,18.0,40.336271,-3.721379,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,569,178000,9,2437,256
-29,1705,19.0,40.0,40.356091,-3.702444,Ángeles,Solar municipal vacío,1159,205000,0,3717,687
-30,266,40.0,10.0,40.329064,-3.677592,Butarque,Patio escolar abierto en verano,1173,218000,0,4248,566
-31,773,10.0,20.0,40.338073,-3.713095,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,390,60000,0,2143,90
-32,690,33.0,18.0,40.336271,-3.685876,San Cristóbal,Interior de manzana,737,171000,0,2240,238
-33,185,45.0,8.0,40.327262,-3.671675,Butarque,Interior de manzana,509,146000,0,1553,300
-34,1129,5.0,27.0,40.344379,-3.719012,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,504,103000,0,2816,261
-35,1929,26.0,46.0,40.361496,-3.69416,Ángeles,Calle a pacificar,257,66000,4,1310,78
-36,740,30.0,19.0,40.337172,-3.689426,San Cristóbal,Interior de manzana,323,97000,0,1399,104
-37,1385,30.0,32.0,40.348884,-3.689426,Los Rosales,Calle a pacificar,439,66000,7,1340,198
-38,1467,23.0,34.0,40.350686,-3.69771,Ángeles,Calle a pacificar,605,113000,9,3597,340
-39,1084,10.0,26.0,40.343478,-3.713095,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,759,144000,0,3838,230
-40,411,27.0,13.0,40.331767,-3.692976,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,736,208000,0,3728,276
-41,1548,20.0,36.0,40.352487,-3.70126,Ángeles,Solar municipal vacío,851,188000,0,3456,384
-42,1882,13.0,45.0,40.360596,-3.709544,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,614,179000,0,2536,156
+0,1811,12.0,43.0,40.358794,-3.710728,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,354,98000,0,1565,92
+1,200,19.0,9.0,40.328163,-3.702444,"Villaverde Alto, Casco Histórico de Villaverde",Patio escolar abierto en verano,446,124000,0,1483,102
+2,1365,10.0,32.0,40.348884,-3.713095,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,352,102000,0,1629,173
+3,414,30.0,13.0,40.331767,-3.689426,Butarque,Patio escolar abierto en verano,621,117000,0,3013,300
+4,1116,42.0,26.0,40.343478,-3.675225,Butarque,Calle a pacificar,474,104000,7,1523,100
+5,1720,34.0,40.0,40.356091,-3.684692,Los Rosales,Interior de manzana,749,190000,0,3185,383
+6,1660,12.0,39.0,40.35519,-3.710728,"Villaverde Alto, Casco Histórico de Villaverde",Patio escolar abierto en verano,427,88000,0,1502,253
+7,716,6.0,19.0,40.337172,-3.717828,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,700,169000,10,3144,297
+8,1366,11.0,32.0,40.348884,-3.711911,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,559,90000,0,3176,243
+9,1680,32.0,39.0,40.35519,-3.687059,Los Rosales,Solar municipal vacío,1307,267000,0,5461,298
+10,1893,24.0,45.0,40.360596,-3.696527,Ángeles,Interior de manzana,726,207000,0,2751,179
+11,118,16.0,7.0,40.326361,-3.705994,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,740,187000,0,2949,419
+12,136,34.0,7.0,40.326361,-3.684692,Butarque,Interior de manzana,762,176000,0,4053,261
+13,1589,20.0,37.0,40.353388,-3.70126,Ángeles,Solar municipal vacío,374,85000,0,1694,162
+14,1949,14.0,47.0,40.362397,-3.708361,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,814,240000,0,3632,335
+15,657,54.0,17.0,40.33537,-3.661024,Butarque,Calle a pacificar,617,159000,9,3247,126
+16,1709,23.0,40.0,40.356091,-3.69771,Ángeles,Solar municipal vacío,1432,295000,0,5113,457
+17,1702,16.0,40.0,40.356091,-3.705994,Ángeles,Solar municipal vacío,728,224000,0,3920,295
+18,1242,25.0,29.0,40.346181,-3.695343,Ángeles,Calle a pacificar,273,78000,4,1073,78
+19,1674,26.0,39.0,40.35519,-3.69416,Ángeles,Solar municipal vacío,336,88000,0,1403,89
+20,674,17.0,18.0,40.336271,-3.704811,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,1331,246000,0,5046,556
+21,1808,9.0,43.0,40.358794,-3.714278,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,756,205000,11,2345,421
+22,1793,31.0,42.0,40.357893,-3.688243,Los Rosales,Solar municipal vacío,879,225000,0,4531,354
+23,737,27.0,19.0,40.337172,-3.692976,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,569,137000,0,1857,290
+24,1168,44.0,27.0,40.344379,-3.672858,Butarque,Calle a pacificar,759,137000,11,4095,242
+25,1061,38.0,25.0,40.342578,-3.679959,Butarque,Solar municipal vacío,337,85000,0,1592,137
+26,636,33.0,17.0,40.33537,-3.685876,Butarque,Patio escolar abierto en verano,424,77000,0,2308,182
+27,1624,15.0,38.0,40.354289,-3.707178,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,426,76000,0,2139,196
+28,1816,17.0,43.0,40.358794,-3.704811,Ángeles,Calle a pacificar,569,178000,9,2437,256
+29,1639,30.0,38.0,40.354289,-3.689426,Los Rosales,Solar municipal vacío,1159,205000,0,3717,687
+30,411,27.0,13.0,40.331767,-3.692976,"Villaverde Alto, Casco Histórico de Villaverde",Patio escolar abierto en verano,1173,218000,0,4248,566
+31,839,23.0,21.0,40.338974,-3.69771,"Villaverde Alto, Casco Histórico de Villaverde",Solar municipal vacío,390,60000,0,2143,90
+32,285,8.0,11.0,40.329965,-3.715462,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,737,171000,0,2240,238
+33,522,29.0,15.0,40.333569,-3.690609,San Cristóbal,Interior de manzana,509,146000,0,1553,300
+34,1102,28.0,26.0,40.343478,-3.691793,San Cristóbal,Interior de manzana,504,103000,0,2816,261
+35,121,19.0,7.0,40.326361,-3.702444,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,257,66000,4,1310,78
+36,1197,25.0,28.0,40.34528,-3.695343,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,323,97000,0,1399,104
+37,673,16.0,18.0,40.336271,-3.705994,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,439,66000,7,1340,198
+38,1488,2.0,35.0,40.351587,-3.722562,"Villaverde Alto, Casco Histórico de Villaverde",Calle a pacificar,605,113000,9,3597,340
+39,777,14.0,20.0,40.338073,-3.708361,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,759,144000,0,3838,230
+40,51,33.0,4.0,40.323659,-3.685876,Butarque,Solar municipal vacío,736,208000,0,3728,276
+41,50,32.0,4.0,40.323659,-3.687059,Butarque,Solar municipal vacío,851,188000,0,3456,384
+42,923,3.0,23.0,40.340776,-3.721379,"Villaverde Alto, Casco Histórico de Villaverde",Interior de manzana,614,179000,0,2536,156

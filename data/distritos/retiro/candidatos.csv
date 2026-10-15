@@ -1,31 +1,31 @@
 id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
-0,101,15.0,12.0,40.405118,-3.675877,Pacífico,Solar municipal vacío,732,119000,0,2453,299
-1,190,20.0,16.0,40.408722,-3.66996,Estrella,Calle a pacificar,669,144000,10,3456,207
-2,135,10.0,14.0,40.40692,-3.681794,Pacífico,Calle a pacificar,639,155000,10,3759,199
+0,102,16.0,12.0,40.405118,-3.674693,Pacífico,Solar municipal vacío,732,119000,0,2453,299
+1,195,25.0,16.0,40.408722,-3.664042,Estrella,Calle a pacificar,669,144000,10,3456,207
+2,136,11.0,14.0,40.40692,-3.68061,Pacífico,Calle a pacificar,639,155000,10,3759,199
 3,69,17.0,10.0,40.403316,-3.67351,Pacífico,Patio escolar abierto en verano,513,146000,0,1599,232
-4,244,1.0,19.0,40.411424,-3.692445,Los Jerónimos,Calle a pacificar,510,161000,8,3019,275
-5,455,21.0,26.0,40.417731,-3.668776,Estrella,Interior de manzana,784,122000,0,3809,295
-6,288,19.0,20.0,40.412325,-3.671143,Niño Jesús,Interior de manzana,570,178000,0,2404,170
-7,400,23.0,24.0,40.415929,-3.666409,Estrella,Interior de manzana,341,63000,0,1860,159
-8,128,23.0,13.0,40.406019,-3.666409,Adelfas,Patio escolar abierto en verano,858,254000,0,3508,344
-9,167,20.0,15.0,40.407821,-3.66996,Estrella,Calle a pacificar,513,139000,8,2765,163
-10,345,23.0,22.0,40.414127,-3.666409,Estrella,Patio escolar abierto en verano,919,271000,0,4032,203
-11,5,17.0,3.0,40.39701,-3.67351,Adelfas,Calle a pacificar,287,68000,4,1438,126
-12,516,25.0,28.0,40.419532,-3.664042,Estrella,Solar municipal vacío,590,157000,0,2767,164
-13,127,22.0,13.0,40.406019,-3.667593,Adelfas,Calle a pacificar,261,60000,4,1052,95
-14,7,19.0,3.0,40.39701,-3.671143,Adelfas,Calle a pacificar,660,123000,10,2973,171
-15,248,5.0,19.0,40.411424,-3.687711,Los Jerónimos,Calle a pacificar,537,92000,8,2545,219
-16,184,14.0,16.0,40.408722,-3.67706,Niño Jesús,Solar municipal vacío,656,174000,0,3487,389
-17,100,14.0,12.0,40.405118,-3.67706,Pacífico,Patio escolar abierto en verano,409,91000,0,1386,220
-18,435,1.0,26.0,40.417731,-3.692445,Los Jerónimos,Patio escolar abierto en verano,517,134000,0,1665,104
-19,365,16.0,23.0,40.415028,-3.674693,Niño Jesús,Interior de manzana,394,110000,0,1750,151
-20,487,24.0,27.0,40.418632,-3.665226,Estrella,Patio escolar abierto en verano,406,111000,0,2424,206
-21,267,24.0,19.0,40.411424,-3.665226,Estrella,Solar municipal vacío,1298,284000,0,5216,681
-22,376,27.0,23.0,40.415028,-3.661675,Estrella,Patio escolar abierto en verano,1033,313000,0,3846,546
-23,173,3.0,16.0,40.408722,-3.690078,Los Jerónimos,Calle a pacificar,467,107000,7,1450,276
-24,313,18.0,21.0,40.413226,-3.672326,Niño Jesús,Calle a pacificar,839,138000,13,2525,478
-25,262,19.0,19.0,40.411424,-3.671143,Niño Jesús,Calle a pacificar,488,86000,7,1623,169
-26,451,17.0,26.0,40.417731,-3.67351,Ibiza,Patio escolar abierto en verano,1156,249000,0,6900,670
-27,317,22.0,21.0,40.413226,-3.667593,Estrella,Interior de manzana,676,143000,0,3022,184
-28,218,24.0,17.0,40.409623,-3.665226,Estrella,Patio escolar abierto en verano,752,203000,0,3335,331
-29,6,18.0,3.0,40.39701,-3.672326,Adelfas,Patio escolar abierto en verano,936,229000,0,3103,526
+4,291,22.0,20.0,40.412325,-3.667593,Estrella,Calle a pacificar,510,161000,8,3019,275
+5,462,28.0,26.0,40.417731,-3.660492,Estrella,Interior de manzana,784,122000,0,3809,295
+6,317,22.0,21.0,40.413226,-3.667593,Estrella,Interior de manzana,570,178000,0,2404,170
+7,423,18.0,25.0,40.41683,-3.672326,Ibiza,Interior de manzana,341,63000,0,1860,159
+8,129,4.0,14.0,40.40692,-3.688894,Los Jerónimos,Patio escolar abierto en verano,858,254000,0,3508,344
+9,169,22.0,15.0,40.407821,-3.667593,Estrella,Calle a pacificar,513,139000,8,2765,163
+10,371,22.0,23.0,40.415028,-3.667593,Estrella,Patio escolar abierto en verano,919,271000,0,4032,203
+11,4,16.0,3.0,40.39701,-3.674693,Adelfas,Calle a pacificar,287,68000,4,1438,126
+12,517,26.0,28.0,40.419532,-3.662859,Estrella,Solar municipal vacío,590,157000,0,2767,164
+13,128,23.0,13.0,40.406019,-3.666409,Adelfas,Calle a pacificar,261,60000,4,1052,95
+14,6,18.0,3.0,40.39701,-3.672326,Adelfas,Calle a pacificar,660,123000,10,2973,171
+15,292,23.0,20.0,40.412325,-3.666409,Estrella,Calle a pacificar,537,92000,8,2545,219
+16,189,19.0,16.0,40.408722,-3.671143,Niño Jesús,Solar municipal vacío,656,174000,0,3487,389
+17,101,15.0,12.0,40.405118,-3.675877,Pacífico,Patio escolar abierto en verano,409,91000,0,1386,220
+18,452,18.0,26.0,40.417731,-3.672326,Ibiza,Patio escolar abierto en verano,517,134000,0,1665,104
+19,381,4.0,24.0,40.415929,-3.688894,Los Jerónimos,Interior de manzana,394,110000,0,1750,151
+20,488,25.0,27.0,40.418632,-3.664042,Estrella,Patio escolar abierto en verano,406,111000,0,2424,206
+21,311,16.0,21.0,40.413226,-3.674693,Niño Jesús,Solar municipal vacío,1298,284000,0,5216,681
+22,401,24.0,24.0,40.415929,-3.665226,Estrella,Patio escolar abierto en verano,1033,313000,0,3846,546
+23,177,7.0,16.0,40.408722,-3.685344,Los Jerónimos,Calle a pacificar,467,107000,7,1450,276
+24,340,18.0,22.0,40.414127,-3.672326,Niño Jesús,Calle a pacificar,839,138000,13,2525,478
+25,296,1.0,21.0,40.413226,-3.692445,Los Jerónimos,Calle a pacificar,488,86000,7,1623,169
+26,457,23.0,26.0,40.417731,-3.666409,Estrella,Patio escolar abierto en verano,1156,249000,0,6900,670
+27,344,22.0,22.0,40.414127,-3.667593,Estrella,Interior de manzana,676,143000,0,3022,184
+28,243,25.0,18.0,40.410523,-3.664042,Estrella,Patio escolar abierto en verano,752,203000,0,3335,331
+29,5,17.0,3.0,40.39701,-3.67351,Adelfas,Patio escolar abierto en verano,936,229000,0,3103,526

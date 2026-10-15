@@ -1,32 +1,32 @@
 id,celda,x,y,lat,lon,barrio,tipo,m2,coste,plazas_perdidas,mantenimiento_anual,agua_m3_anual
-0,612,51.0,18.0,40.328361,-3.621583,Casco Histórico de Vallecas,Calle a pacificar,264,52000,4,1549,98
-1,1606,44.0,32.0,40.340974,-3.629867,Casco Histórico de Vallecas,Solar municipal vacío,644,193000,0,2945,141
-2,1707,64.0,33.0,40.341874,-3.606198,Casco Histórico de Vallecas,Solar municipal vacío,1420,415000,0,5708,761
-3,2118,48.0,38.0,40.346379,-3.625133,Casco Histórico de Vallecas,Calle a pacificar,404,114000,6,2315,166
-4,496,82.0,15.0,40.325658,-3.584896,Casco Histórico de Vallecas,Interior de manzana,460,137000,0,1661,113
-5,1074,57.0,25.0,40.334667,-3.614482,Casco Histórico de Vallecas,Solar municipal vacío,447,93000,0,2612,214
-6,4311,60.0,62.0,40.368001,-3.610932,Ensanche de Vallecas,Solar municipal vacío,621,141000,0,1915,247
-7,4496,73.0,65.0,40.370703,-3.595547,Ensanche de Vallecas,Solar municipal vacío,661,109000,0,3368,338
-8,766,32.0,21.0,40.331064,-3.644068,Casco Histórico de Vallecas,Interior de manzana,342,102000,0,1842,192
-9,3496,51.0,52.0,40.358992,-3.621583,Casco Histórico de Vallecas,Calle a pacificar,432,128000,6,1891,169
-10,1378,54.0,29.0,40.338271,-3.618033,Casco Histórico de Vallecas,Solar municipal vacío,1394,240000,0,6993,343
-11,2135,65.0,38.0,40.346379,-3.605015,Casco Histórico de Vallecas,Interior de manzana,469,112000,0,1569,263
-12,3850,39.0,56.0,40.362595,-3.635784,Casco Histórico de Vallecas,Solar municipal vacío,956,282000,0,4969,538
-13,4683,58.0,69.0,40.374307,-3.613299,Ensanche de Vallecas,Calle a pacificar,331,63000,5,1775,98
-14,4818,65.0,72.0,40.37701,-3.605015,Santa Eugenia,Interior de manzana,593,104000,0,2930,340
-15,44,64.0,3.0,40.314847,-3.606198,Casco Histórico de Vallecas,Calle a pacificar,294,89000,4,1495,119
-16,3559,12.0,53.0,40.359893,-3.667737,Casco Histórico de Vallecas,Solar municipal vacío,1393,228000,0,6630,443
-17,2601,69.0,43.0,40.350883,-3.600281,Casco Histórico de Vallecas,Calle a pacificar,669,152000,10,3240,310
-18,2346,95.0,40.0,40.348181,-3.569512,Casco Histórico de Vallecas,Solar municipal vacío,480,135000,0,2215,209
-19,1133,40.0,26.0,40.335568,-3.634601,Casco Histórico de Vallecas,Interior de manzana,388,67000,0,2311,143
-20,4590,62.0,67.0,40.372505,-3.608565,Ensanche de Vallecas,Solar municipal vacío,932,222000,0,5481,375
-21,1222,53.0,27.0,40.336469,-3.619216,Casco Histórico de Vallecas,Solar municipal vacío,1067,285000,0,6188,600
-22,2229,69.0,39.0,40.34728,-3.600281,Casco Histórico de Vallecas,Calle a pacificar,592,141000,9,2513,265
-23,2251,91.0,39.0,40.34728,-3.574246,Casco Histórico de Vallecas,Solar municipal vacío,1095,245000,0,5602,418
-24,4769,54.0,71.0,40.376109,-3.618033,Casco Histórico de Vallecas,Interior de manzana,666,128000,0,3857,248
-25,3510,65.0,52.0,40.358992,-3.605015,Casco Histórico de Vallecas,Solar municipal vacío,300,58000,0,1552,166
-26,690,74.0,19.0,40.329262,-3.594364,Casco Histórico de Vallecas,Patio escolar abierto en verano,1120,263000,0,6121,424
-27,5019,53.0,80.0,40.384217,-3.619216,Santa Eugenia,Patio escolar abierto en verano,656,138000,0,2106,192
-28,4701,30.0,70.0,40.375208,-3.646435,Casco Histórico de Vallecas,Patio escolar abierto en verano,1138,289000,0,6557,651
-29,2598,66.0,43.0,40.350883,-3.603831,Casco Histórico de Vallecas,Solar municipal vacío,383,67000,0,1295,153
-30,2740,13.0,45.0,40.352685,-3.666553,Casco Histórico de Vallecas,Solar municipal vacío,1062,216000,0,4158,575
+0,3322,86.0,50.0,40.35719,-3.580163,Casco Histórico de Vallecas,Calle a pacificar,264,52000,4,1549,98
+1,4657,32.0,69.0,40.374307,-3.644068,Casco Histórico de Vallecas,Solar municipal vacío,644,193000,0,2945,141
+2,3438,97.0,51.0,40.358091,-3.567145,Casco Histórico de Vallecas,Solar municipal vacío,1420,415000,0,5708,761
+3,2596,64.0,43.0,40.350883,-3.606198,Casco Histórico de Vallecas,Calle a pacificar,404,114000,6,2315,166
+4,2875,48.0,46.0,40.353586,-3.625133,Casco Histórico de Vallecas,Interior de manzana,460,137000,0,1661,113
+5,4924,46.0,76.0,40.380613,-3.6275,Casco Histórico de Vallecas,Solar municipal vacío,447,93000,0,2612,214
+6,2551,19.0,43.0,40.350883,-3.659453,Casco Histórico de Vallecas,Solar municipal vacío,621,141000,0,1915,247
+7,3554,7.0,53.0,40.359893,-3.673654,Casco Histórico de Vallecas,Solar municipal vacío,661,109000,0,3368,338
+8,1525,43.0,31.0,40.340073,-3.63105,Casco Histórico de Vallecas,Interior de manzana,342,102000,0,1842,192
+9,4672,47.0,69.0,40.374307,-3.626317,Casco Histórico de Vallecas,Calle a pacificar,432,128000,6,1891,169
+10,3250,14.0,50.0,40.35719,-3.66537,Casco Histórico de Vallecas,Solar municipal vacío,1394,240000,0,6993,343
+11,349,66.0,12.0,40.322956,-3.603831,Casco Histórico de Vallecas,Interior de manzana,469,112000,0,1569,263
+12,3700,57.0,54.0,40.360793,-3.614482,Casco Histórico de Vallecas,Solar municipal vacío,956,282000,0,4969,538
+13,21,69.0,2.0,40.313947,-3.600281,Casco Histórico de Vallecas,Calle a pacificar,331,63000,5,1775,98
+14,3335,99.0,50.0,40.35719,-3.564778,Casco Histórico de Vallecas,Interior de manzana,593,104000,0,2930,340
+15,4812,59.0,72.0,40.37701,-3.612115,Ensanche de Vallecas,Calle a pacificar,294,89000,4,1495,119
+16,2242,82.0,39.0,40.34728,-3.584896,Casco Histórico de Vallecas,Solar municipal vacío,1393,228000,0,6630,443
+17,4937,59.0,76.0,40.380613,-3.612115,Santa Eugenia,Calle a pacificar,669,152000,10,3240,310
+18,2422,80.0,41.0,40.349082,-3.587263,Casco Histórico de Vallecas,Solar municipal vacío,480,135000,0,2215,209
+19,576,66.0,17.0,40.32746,-3.603831,Casco Histórico de Vallecas,Interior de manzana,388,67000,0,2311,143
+20,1607,45.0,32.0,40.340974,-3.628683,Casco Histórico de Vallecas,Solar municipal vacío,932,222000,0,5481,375
+21,2792,65.0,45.0,40.352685,-3.605015,Casco Histórico de Vallecas,Solar municipal vacío,1067,285000,0,6188,600
+22,4570,42.0,67.0,40.372505,-3.632234,Ensanche de Vallecas,Calle a pacificar,592,141000,9,2513,265
+23,4336,25.0,63.0,40.368902,-3.652352,Casco Histórico de Vallecas,Solar municipal vacío,1095,245000,0,5602,418
+24,3999,31.0,58.0,40.364397,-3.645251,Casco Histórico de Vallecas,Interior de manzana,666,128000,0,3857,248
+25,1565,83.0,31.0,40.340073,-3.583713,Casco Histórico de Vallecas,Solar municipal vacío,300,58000,0,1552,166
+26,3698,55.0,54.0,40.360793,-3.616849,Casco Histórico de Vallecas,Patio escolar abierto en verano,1120,263000,0,6121,424
+27,4520,44.0,66.0,40.371604,-3.629867,Ensanche de Vallecas,Patio escolar abierto en verano,656,138000,0,2106,192
+28,3232,100.0,49.0,40.356289,-3.563595,Casco Histórico de Vallecas,Patio escolar abierto en verano,1138,289000,0,6557,651
+29,1661,18.0,33.0,40.341874,-3.660636,Casco Histórico de Vallecas,Solar municipal vacío,383,67000,0,1295,153
+30,2319,68.0,40.0,40.348181,-3.601464,Casco Histórico de Vallecas,Solar municipal vacío,1062,216000,0,4158,575
